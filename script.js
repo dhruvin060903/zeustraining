@@ -1,4 +1,5 @@
-function validateForm() {
+function validateForm(event) {
+    event.preventDefault();
     const name = document.getElementById("name").value.trim();
     const comments = document.getElementById("comments").value.trim();
     const genderMale = document.getElementById("male").checked;
@@ -20,5 +21,11 @@ function validateForm() {
     }
 
     alert("Form submitted successfully!");
+    document.getElementById("name").value = "";
+    document.getElementById("comments").value = "";
+    document.getElementById("male").checked = false;
+    document.getElementById("female").checked = false;
+
+
     return true;
 }
