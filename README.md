@@ -2,7 +2,7 @@
 
 ## Day 1 Task - Web Development Basics
 
-## 📌 What is HTML?
+## What is HTML?
 
 HTML (HyperText Markup Language) is the standard markup language used to create the structure of web pages. It uses tags to define elements like headings, paragraphs, links, images, and more.
 
