@@ -1,6 +1,6 @@
 # zeustraining
 
-## 📝 Day 1 Task - Web Development Basics
+## Day 1 Task - Web Development Basics
 
 ## 📌 What is HTML?
 
@@ -8,7 +8,7 @@ HTML (HyperText Markup Language) is the standard markup language used to create 
 
 ---
 
-## 📄 Basic Structure of an HTML Page
+## Basic Structure of an HTML Page
 
 ```html
 <!DOCTYPE html>
@@ -59,7 +59,7 @@ HTML (HyperText Markup Language) is the standard markup language used to create 
    </style>
    ```
 
-3. **External CSS (✅ Preferred):**  
+3. **External CSS (Preferred):**  
    Linked through a separate `.css` file.
    ```html
    <link rel="stylesheet" href="style.css">
@@ -69,7 +69,7 @@ HTML (HyperText Markup Language) is the standard markup language used to create 
 
 ---
 
-## 🎯 CSS Selectors
+## CSS Selectors
 
 1. **Element Selector:**
    ```css
@@ -94,7 +94,7 @@ HTML (HyperText Markup Language) is the standard markup language used to create 
 
 ---
 
-## ⚙️ Ways to Add JavaScript to a Webpage
+## Ways to Add JavaScript to a Webpage
 
 1. **Inline JavaScript:**
    ```html
@@ -108,7 +108,7 @@ HTML (HyperText Markup Language) is the standard markup language used to create 
    </script>
    ```
 
-3. **External JavaScript (✅ Preferred):**
+3. **External JavaScript (Preferred):**
    ```html
    <script src="script.js"></script>
    ```
@@ -117,4 +117,4 @@ HTML (HyperText Markup Language) is the standard markup language used to create 
 
 ---
 
-✅ **End of Day 1 Task**
+**End of Day 1 Task**
