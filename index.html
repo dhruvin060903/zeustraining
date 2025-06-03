@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>My First Web Page</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+
+
+</head>
+
+<body>
+    <div class="title">
+        <h1>My First Web Page</h1>
+    </div>
+    <h2>What this is</h2>
+    <p>Welcome to my <I>first webpage</I>. I created this webpage without the assitance of a webpage editor. Hust my
+        little text editor and a keen <b>understanding of html.</b></p>
+    <h2>Why this is</h2>
+    <ul>
+
+        <li>To learn HTML</li>
+        <li>List element</li>
+        <ol>
+            <li>Home</li>
+            <li>FAQ</li>
+            <li>Contact</li>
+            <li>About</li>
+        </ol>
+        <li>Here I have created ordered and unordered list</li>
+
+    </ul>
+
+    <h2>ZeusLeaning.com</h2>
+
+    <a href="https://www.zeuslearning.com/" target="_blank">This link will open zeuslearning.com in new tab</a>
+
+    <h2>On click of following image navigate to Google.com</h2><br>
+    <a href="https://www.google.com/" target="_blank">
+        <img src="google.png" width="200" alt="google" />
+    </a>
+    <br>
+    <h3>Some random table</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Age</th>
+                <th>City</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>John Doe</td>
+                <td>28</td>
+                <td>Mumbai</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>Jane Smith</td>
+                <td>34</td>
+                <td>Pune</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>Rahul Sharma</td>
+                <td>25</td>
+                <td>Delhi</td>
+            </tr>
+        </tbody>
+    </table>
+    <h3>Some random form</h3>
+
+    <p><b>Note:</b> It looks the part, but won't do a anything.</p>
+    <form onsubmit="return validateForm()">
+
+        <label for="name">Name:</label><br><br>
+        <input type="text" id="name" name="name" placeholder="Your name"><br>
+        <br>
+        <label for="comments">Comments:</label><br><br>
+        <textarea id="comments" name="comments" rows="10" cols="30" placeholder="Your comments"
+            style="overflow: auto;"></textarea><br>
+        <br>
+        <label for="gender">Are you:</label><br><br>
+
+        <input type="radio" id="male" name="gender" value="male">
+        <label for="male">Male</label><br><br>
+
+        <input type="radio" id="female" name="gender" value="female">
+        <label for="female">Female</label><br><br>
+        <input type="submit" name="submitButton" value="Submit Query">
+
+    </form>
+</body>
+
+</html>
