@@ -25,6 +25,16 @@ h2 {
     font-size: 20px;
 }
 
+ .fancy-border {
+      display: inline-block;
+      border: 2px dashed #aaa;
+      padding: 10px;
+      background-color: #ffffff; /* light yellow */
+    }
+img{
+
+       width: 200px;
+}
 ul{
     color: darkred;
 }
