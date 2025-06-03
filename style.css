@@ -1,93 +1,93 @@
-
 body {
-    background-color: #ffffcc;
-    font-family: Arial, sans-serif;
+  background-color: #ffffcc;
+  font-family: Arial, sans-serif;
 }
-.title{
-     background-color: red;
-     padding-bottom: 2px;
+.title {
+  background-color: #cc0000;
+  padding-bottom: 2px;
 }
 h1 {
-    background-color: darkred;
-    color:  #ffffcc;
-    text-align: center;
-    padding: 10px;
-    font-size: 28px;
-    letter-spacing: 4px;
-        font-style: italic;
-
+  background-color: darkred;
+  color: #ffffcc;
+  text-align: center;
+  padding: 10px;
+  font-size: 28px;
+  letter-spacing: 10px;
+  font-style: italic;
 }
 
 h2 {
-    background-color: green;
-    color: white;
-    padding: 5px 10px;
-    font-size: 20px;
+  background-color: #009900;
+  color: white;
+  padding: 5px 10px;
+  font-size: 20px;
 }
-
- .fancy-border {
-      display: inline-block;
-      border: 2px dashed #aaa;
-      padding: 10px;
-      background-color: #ffffff; /* light yellow */
-    }
-img{
-
-       width: 200px;
+.wti {
+  margin-top: 8px;
 }
-ul{
-    color: darkred;
+.fancy-border {
+  display: inline-block;
+  border: 2px dashed #aaa;
+  padding: 10px 30px 10px 10px;
+  background-color: #ffffff; /* light yellow */
+}
+img {
+  width: 200px;
+}
+ul {
+  color: #b54739;
 }
 h3 {
-    color: gray;
+  color: gray;
 }
 
 a {
-    color: darkred;
-    text-decoration: none;
+  color: darkred;
+  text-decoration: none;
 }
 
 a:hover {
-    text-decoration: underline;
+  text-decoration: underline;
 }
-
+#comments {
+  overflow-y: scroll;
+}
 
 table {
-       border: 1px solid black;
-           background-color: #cccccc;
+  border: 1px solid black;
+  background-color: #cccccc;
 
-    margin-top: 10px;
+  margin-top: 10px;
 }
 
-th, td {
-    border: 1px solid black;
- 
+th,
+td {
+  border: 1px solid black;
 }
 
 /* Form styling */
 form {
-    margin-top: 20px;
+  margin-top: 20px;
 }
 
 input[type="text"],
 textarea {
-    width: 200px;
-    padding: 5px;
+  width: 200px;
+  padding: 5px;
 }
 
 textarea {
-    resize: vertical;
+  resize: vertical;
 }
 
 input[type="submit"] {
-    margin-top: 10px;
-    padding: 5px 10px;
-    background-color: lightgray;
-    border: 1px solid gray;
-    cursor: pointer;
+  margin-top: 10px;
+  padding: 5px 10px;
+  background-color: lightgray;
+  border: 1px solid gray;
+  cursor: pointer;
 }
 
-/* Paragraph styling */
 p {
-    padding: 0 0px;
+  padding: 0 0px;
 }

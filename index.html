@@ -14,9 +14,9 @@
     <div class="title">
         <h1>My First Web Page</h1>
     </div>
-    <h2>What this is</h2>
-    <p>Welcome to my <I>first webpage</I>. I created this webpage without the assitance of a webpage editor. Hust my
-        little text editor and a keen <b>understanding of html.</b></p>
+    <h2 class="wti">What this is</h2>
+    <p>Welcome to my <I>first webpage</I>. I created this webpage without the assitance of a webpage editor. Just my
+        little text editor and a keen <b style="text-transform: uppercase"><I>understanding of html.</I></b></p>
     <h2>Why this is</h2>
     <ul>
 
@@ -45,46 +45,38 @@
     <br>
     <h3>Some random table</h3>
     <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Age</th>
-                <th>City</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>1</td>
-                <td>John Doe</td>
-                <td>28</td>
-                <td>Mumbai</td>
-            </tr>
-            <tr>
-                <td>2</td>
-                <td>Jane Smith</td>
-                <td>34</td>
-                <td>Pune</td>
-            </tr>
-            <tr>
-                <td>3</td>
-                <td>Rahul Sharma</td>
-                <td>25</td>
-                <td>Delhi</td>
-            </tr>
+       <tr>
+        <td>Row 1, cell 1</td>
+        <td>Row 1, cell 2</td>
+        <td>Row 1, cell 3</td>
+    </tr>
+    <tr>
+        <td>Row 2, cell 1</td>
+        <td>Row 2, cell 2</td>
+        <td>Row 2, cell 3</td>
+    </tr>
+    <tr>
+        <td>Row 3, cell 1</td>
+        <td>Row 3, cell 2</td>
+        <td>Row 3, cell 3</td>
+    </tr>
+    <tr>
+        <td>Row 4, cell 1</td>
+        <td>Row 4, cell 2</td>
+        <td>Row 4, cell 3</td>
+    </tr>
         </tbody>
     </table>
     <h3>Some random form</h3>
 
-    <p><b>Note:</b> It looks the part, but won't do a anything.</p>
+    <p><b><I>Note:</I></b> It looks the part, but won't do a anything.</p>
     <form onsubmit="return validateForm(event)">
 
         <label for="name">Name:</label><br><br>
         <input type="text" id="name" name="name" placeholder="Your name"><br>
         <br>
         <label for="comments">Comments:</label><br><br>
-        <textarea id="comments" name="comments" rows="10" cols="30" placeholder="Your comments"
-            style="overflow: auto;"></textarea><br>
+        <textarea id="comments" name="comments" rows="10" cols="30" placeholder="Your comments"></textarea><br>
         <br>
         <label for="gender">Are you:</label><br><br>
 
