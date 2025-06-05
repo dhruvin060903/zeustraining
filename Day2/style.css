@@ -1,48 +1,68 @@
 body {
   font-family: "Roboto", sans-serif;
   background-color: #f5f8fa;
+
+  /* Centering setup */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* Full viewport height */
+  margin: 0;
 }
 
 .tweet-card {
   display: flex;
   background-color: white;
+
   /* border-radius: 12px; */
-  padding: 5px;
-  width: 350px;
+  /* padding: 4px; */
+  width: 457px;
+  height: 138px;
 }
 
 .profile-pic {
-  width: 100px;
-  height: 100px;
-  object-fit: cover;
-  margin-right: 15px;
+  width: 130px;
+  margin: 4px;
+  height: 130px;
+  margin-right: 14px;
 }
 
 .tweet-content {
-  margin-top: 10px;
+  /* margin-top: 8 px; */
   flex: 1;
 }
-
-.tweet-content p {
-  margin: 5px 0;
+.username {
+  font-size: 20px;
+}
+.user {
+  margin-bottom: 0px;
+}
+.comment {
+  margin-top: 14px;
+  font-size: 20px;
+  margin-bottom: 0px;
 }
 
 .tweet-stats {
   display: flex;
-  margin-top: 10px;
+  margin-top: 24px;
   color: #555;
   font-size: 12px;
-  margin-left: 5px;
+  /* margin-left: 5px; */
 }
 .tweet-stats span {
   display: flex;
   align-items: center;
-  margin-right: 18px;
-  color: #8a8e92;
-  font-weight: 550;
+  margin-right: 24px;
+  color: #858991;
+  font-weight: 500;
+  font-size: 15px;
 }
 .tweet-stats i {
-  font-size: 16px;
+  font-size: 20px;
   color: #8a8e92;
-  margin-right: 10px;
+  margin-right: 14px;
+}
+.tweetIcon {
+  margin-right: 14px;
 }
