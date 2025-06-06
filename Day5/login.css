@@ -1,0 +1,75 @@
+body {
+  background-color: #eeeeee;
+  margin: 0;
+}
+
+.loginWrapper {
+  height: 96vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loginCard {
+  /* display: flex; */
+  width: 488px;
+  align-items: center;
+  /* justify-content: center; */
+
+  background-color: white;
+  /* padding: 2rem; */
+  border-top: 4px solid #3ac7ec;
+  /* padding-left: 32px; */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+.line {
+  background-color: #3ac7ec;
+  height: 2px;
+  justify-self: start;
+}
+.header {
+  background-color: #25313f;
+  color: white;
+}
+.headerLogo {
+  width: 134px;
+  height: 36px;
+  margin-left: 28.88px;
+  margin-top: 10.05px;
+}
+.cardHeader {
+  position: relative;
+  width: 100%;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backImg {
+  position: absolute;
+  left: 32px;
+  width: 24px; /* Adjust size as needed */
+  height: 24px;
+  cursor: pointer;
+}
+
+.cardHeader p {
+  margin: 0;
+  font-weight: bold;
+  font-size: 16px;
+}
+.radioButtons {
+  margin-top: 2px;
+  /* margin-left: 16px; */
+  display: flex;
+}
+.radioImg {
+  margin-right: 8px;
+}
+.radioButtons > p {
+  margin-right: 32px;
+}
+.loginPadding {
+  padding-left: 32px;
+}
