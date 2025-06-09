@@ -3,28 +3,112 @@
   <head>
     <title>Login</title>
     <link rel="stylesheet" href="login.css" />
+    <script>
+      function togglePassword() {
+        const password = document.getElementById("password");
+        password.type = password.type === "password" ? "text" : "password";
+      }
+    </script>
   </head>
   <body>
     <div class="header">
-      <img src="logo used in header.svg" alt="headerLogo" class="headerLogo" />
+      <img
+        src="./images/logo used in header.svg"
+        alt="headerLogo"
+        class="headerLogo"
+      />
     </div>
 
     <div class="loginWrapper">
       <div class="loginCard">
         <div class="cardHeader">
-          <img src="back.svg" alt="backbutton" class="backImg" />
+          <img src="./images/back.svg" alt="backbutton" class="backImg" />
           <p>Log in With Quantum</p>
         </div>
         <div class="loginPadding">
           <div class="radioButtons">
-            <img src="radio-button-on.svg" alt="backbutton" class="radioImg" />
-            <p>Distict</p>
-            <img src="radio-button-off.svg" alt="backbutton" class="radioImg" />
-            <p>Independent school</p>
+            <label class="custom-radio">
+              <input type="radio" name="schoolType" value="district" />
+              <span class="checkmark"></span>
+              District
+            </label>
+
+            <label class="custom-radio">
+              <input type="radio" name="schoolType" value="independent" />
+              <span class="checkmark"></span>
+              Independent school
+            </label>
           </div>
-          <p>state</p>
+          <div class="stateSel">
+            <label for="state" class="inputLable">State*</label>
+
+            <select id="state" name="state" class="selection">
+              <option value="">Select a State</option>
+              <option value="alabama">Alabama</option>
+            </select>
+          </div>
+          <div class="selectDis">
+            <label for="district" class="inputLable">District*</label>
+
+            <select id="district" name="district" class="selection">
+              <option value="">Select a District</option>
+              <option value="alabamaschooldistrict">
+                Alabama School District
+              </option>
+            </select>
+          </div>
+          <div class="inputuser">
+            <input
+              type="text"
+              id="username"
+              name="username"
+              class="inputUsername"
+              placeholder="Username/Email ID*"
+            />
+            <a class="forgot">FORGOT USERNAME?</a>
+          </div>
+
+          <div class="password-wrapper">
+            <input
+              type="password"
+              id="password"
+              name="password"
+              class="inputPassword"
+              placeholder="Password*"
+            />
+            <img
+              src="./images/preview.svg"
+              id="togglePassword"
+              class="preview-icon"
+              alt="Show Password"
+              onclick="togglePassword()"
+            />
+          </div>
+
+          <a class="forgot">FORGOT PASSWORD?</a>
+
+          <label class="remember-me">
+            <input type="checkbox" />
+            <span class="custom-checkbox"></span>
+            Remember me
+          </label>
+          <button class="log-in-btn" onclick="">Log In</button>
         </div>
       </div>
+    </div>
+    <div class="aboutContact">About | Contact Us</div>
+    <div class="footer">
+      <img
+        src="./images/logo used in footer.svg"
+        alt="logo"
+        class="footerlogo"
+      />
+      <p class="verticalBar">|</p>
+      <p>
+        Copyright © 2020-2021<span class="companyName"
+          >Zeus System Pvt. Ltd.</span
+        >All rights reserved
+      </p>
     </div>
   </body>
 </html>

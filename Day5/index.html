@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Login</title>
+    <link rel="stylesheet" href="index.css" />
+    <script>
+      function togglePassword() {
+        const password = document.getElementById("password");
+        password.type = password.type === "password" ? "text" : "password";
+      }
+    </script>
+  </head>
+  <body>
+    <div class="header">
+      <img
+        src="./images/logo used in header.svg"
+        alt="headerLogo"
+        class="headerLogo"
+      />
+      <div class="navbar">
+        <div class="activeItem">DASHBOARD</div>
+        <div class="inActiveItem">CONTENT</div>
+        <div class="inActiveItem">USERS</div>
+        <div class="inActiveItem">REPORTS</div>
+        <div class="inActiveItem">ADMIN</div>
+        <div class="alert-wrapper">
+          <div class="alert-bell"></div>
+          <div class="alert-badge">2</div>
+        </div>
+        <div class="announcement-wrapper">
+          <div class="announcement-bell"></div>
+          <div class="announcement-badge">1</div>
+        </div>
+        <!-- <img src="./images/announcements.svg" alt="announcement" /> -->
+
+        <img src="./images/account_circle.svg" alt="account" />
+      </div>
+    </div>
+    <div class="main-content-border">
+      <div class="main-content">
+        <div class="courses-classes">
+          <div class="courses">
+            <img src="./images/courses.svg" />
+            <p>4 courses</p>
+          </div>
+          <div class="classes">
+            <img src="./images/classes.svg" />
+            <p>4 Classes</p>
+          </div>
+        </div>
+        <div class="sort">
+          <div class="sort1">Showing 4 of 4 courses</div>
+          <div class="sort2">
+            <span>Sort By:</span>
+            <div class="sortSelect">
+              <select id="course" name="course" class="course">
+                <option value="courseName">Course Name</option>
+              </select>
+            </div>
+            <img src="./images/sort.svg" alt="sort" class="sortimage" />
+          </div>
+        </div>
+        <div class="card-container">
+          <div class="card">
+            <div class="cardcontent">
+              <img
+                class="cardImg"
+                src="./images/imageMask-1.svg"
+                alt="cardimg"
+              />
+              <div class="cardTextContent">
+                <div class="cardTitle">
+                  <span>Acceleration</span>
+                  <img
+                    src="./images/favourite.svg"
+                    alt="favourite"
+                    class="favouriteImg"
+                  />
+                </div>
+
+                <div class="grade">
+                  <span>Physics | Grage 7 + 2</span>
+                </div>
+                <div class="ULT">
+                  <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
+                </div>
+                <div class="selectClass">
+                  <select id="course" name="course" class="course">
+                    <option value="courseName">Course Name</option>
+                  </select>
+                </div>
+                <div class="cardDates">
+                  <span>50 Students | 21-jan-2020 - 21-Aug-2020</span>
+                </div>
+              </div>
+            </div>
+            <div class="cardIcons">
+              <div class="cardIconsMargin">
+                <img
+                  src="./images/preview.svg
+                "
+                  alt="previewimg"
+                  class="previewimg"
+                />
+                <img
+                  src="./images/manage course.svg"
+                  alt="manage course"
+                  class="gardeImg"
+                />
+                <img src="./images/grade submissions.svg" alt="gradeimg" />
+                <img src="./images/reports.svg" alt="report" class="report" />
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="cardcontent">
+              <img
+                class="cardImg"
+                src="./images/imageMask-2.svg"
+                alt="cardimg"
+              />
+              <div class="cardTextContent">
+                <div class="cardTitle">
+                  <span>Acceleration</span>
+                  <img
+                    src="./images/favourite.svg"
+                    alt="favourite"
+                    class="favouriteImg"
+                  />
+                </div>
+
+                <div class="grade">
+                  <span>Physics | Grage 7 + 2</span>
+                </div>
+                <div class="ULT">
+                  <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
+                </div>
+                <div class="selectClass">
+                  <select id="course" name="course" class="course">
+                    <option value="courseName">Course Name</option>
+                  </select>
+                </div>
+                <div class="cardDates">
+                  <span>50 Students | 21-jan-2020 - 21-Aug-2020</span>
+                </div>
+              </div>
+            </div>
+            <div class="cardIcons">
+              <div class="cardIconsMargin">
+                <img
+                  src="./images/preview.svg
+                "
+                  alt="previewimg"
+                  class="previewimg"
+                />
+                <img
+                  src="./images/manage course.svg"
+                  alt="manage course"
+                  class="gardeImg"
+                />
+                <img src="./images/grade submissions.svg" alt="gradeimg" />
+                <img src="./images/reports.svg" alt="report" class="report" />
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="cardcontent">
+              <img class="cardImg" src="./images/imageMask.svg" alt="cardimg" />
+              <div class="cardTextContent">
+                <div class="cardTitle">
+                  <span>Acceleration</span>
+                  <img
+                    src="./images/favourite.svg"
+                    alt="favourite"
+                    class="favouriteImg"
+                  />
+                </div>
+
+                <div class="grade">
+                  <span>Physics | Grage 7 + 2</span>
+                </div>
+                <div class="ULT">
+                  <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
+                </div>
+                <div class="selectClass">
+                  <select id="course" name="course" class="course">
+                    <option value="courseName">Course Name</option>
+                  </select>
+                </div>
+                <div class="cardDates">
+                  <span>50 Students | 21-jan-2020 - 21-Aug-2020</span>
+                </div>
+              </div>
+            </div>
+            <div class="cardIcons">
+              <div class="cardIconsMargin">
+                <img
+                  src="./images/preview.svg
+                "
+                  alt="previewimg"
+                  class="previewimg"
+                />
+                <img
+                  src="./images/manage course.svg"
+                  alt="manage course"
+                  class="gardeImg"
+                />
+                <img src="./images/grade submissions.svg" alt="gradeimg" />
+                <img src="./images/reports.svg" alt="report" class="report" />
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="cardcontent">
+              <img
+                class="cardImg"
+                src="./images/imageMask-3.svg"
+                alt="cardimg"
+              />
+              <div class="cardTextContent">
+                <div class="cardTitle">
+                  <span>Acceleration</span>
+                  <img
+                    src="./images/favourite.svg"
+                    alt="favourite"
+                    class="favouriteImg"
+                  />
+                </div>
+
+                <div class="grade">
+                  <span>Physics | Grage 7 + 2</span>
+                </div>
+                <div class="ULT">
+                  <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
+                </div>
+                <div class="selectClass">
+                  <select id="course" name="course" class="course">
+                    <option value="courseName">Course Name</option>
+                  </select>
+                </div>
+                <div class="cardDates">
+                  <span>50 Students | 21-jan-2020 - 21-Aug-2020</span>
+                </div>
+              </div>
+            </div>
+            <div class="cardIcons">
+              <div class="cardIconsMargin">
+                <img
+                  src="./images/preview.svg
+                "
+                  alt="previewimg"
+                  class="previewimg"
+                />
+                <img
+                  src="./images/manage course.svg"
+                  alt="manage course"
+                  class="gardeImg"
+                />
+                <img src="./images/grade submissions.svg" alt="gradeimg" />
+                <img src="./images/reports.svg" alt="report" class="report" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="aboutContact">About | Contact Us</div>
+
+    <div class="footer">
+      <img
+        src="./images/logo used in footer.svg"
+        alt="logo"
+        class="footerlogo"
+      />
+      <p class="verticalBar">|</p>
+      <p>
+        Copyright © 2020-2021<span class="companyName"
+          >Zeus System Pvt. Ltd.</span
+        >All rights reserved
+      </p>
+    </div>
+  </body>
+</html>

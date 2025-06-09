@@ -1,25 +1,61 @@
+@font-face {
+  font-family: "Quicksand";
+  src: url("fonts/Quicksand-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Quicksand";
+  src: url("fonts/Quicksand-Medium.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Quicksand";
+  src: url("fonts/Quicksand-SemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Quicksand";
+  src: url("fonts/Quicksand-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+html,
 body {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+body {
+  font-family: "Quicksand", sans-serif;
+  font-weight: 500;
+
   background-color: #eeeeee;
   margin: 0;
 }
 
 .loginWrapper {
   height: 96vh;
+  margin-top: 50px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .loginCard {
-  /* display: flex; */
   width: 488px;
   align-items: center;
-  /* justify-content: center; */
 
   background-color: white;
-  /* padding: 2rem; */
+
   border-top: 4px solid #3ac7ec;
-  /* padding-left: 32px; */
+
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 .line {
@@ -28,9 +64,34 @@ body {
   justify-self: start;
 }
 .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   background-color: #25313f;
   color: white;
+  height: 56px;
+  z-index: 1000;
+  overflow: hidden;
 }
+
+.header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("./images/header\ pattern\ svg.svg");
+  opacity: 0.3;
+  z-index: 0;
+}
+
+.header > * {
+  position: relative;
+  z-index: 1;
+}
+
 .headerLogo {
   width: 134px;
   height: 36px;
@@ -40,12 +101,16 @@ body {
 .cardHeader {
   position: relative;
   width: 100%;
-  padding: 12px 16px;
+  margin-top: 20px;
+  /* padding: 12px 16px; */
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
+.cardHeader > p {
+  font-weight: 500;
+  font-size: 24px;
+}
 .backImg {
   position: absolute;
   left: 32px;
@@ -60,16 +125,215 @@ body {
   font-size: 16px;
 }
 .radioButtons {
-  margin-top: 2px;
-  /* margin-left: 16px; */
+  margin-top: 34px;
+  font-weight: 500;
+
+  /* margin: 0; */
   display: flex;
+  padding-left: 0;
+  gap: 32px;
+  margin-bottom: 23px;
 }
-.radioImg {
-  margin-right: 8px;
+
+.custom-radio {
+  position: relative;
+  padding-left: 24px;
+  cursor: pointer;
+  font-size: 12px;
+  user-select: none;
+  color: #333;
+  display: flex;
+  align-items: center;
 }
-.radioButtons > p {
-  margin-right: 32px;
+
+.custom-radio input[type="radio"] {
+  /* Fully hide native radio */
+  position: absolute;
+  opacity: 0;
+  height: 0;
+  width: 0;
+  margin: 0;
+  pointer-events: none;
 }
+
+.checkmark {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
+  width: 20px;
+  background-image: url("./images/radio-button-off.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: 0.2s;
+}
+
+.custom-radio input:checked + .checkmark {
+  background-image: url("./images/radio-button-on.svg");
+}
+
 .loginPadding {
   padding-left: 32px;
+  padding-right: 32px;
+}
+.inputLable {
+  font-size: 12px;
+  color: #666666;
+  display: block;
+}
+
+select {
+  display: block;
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+  outline: none;
+  background: none;
+  padding-top: 5px;
+  font-size: 16px;
+  text-align: left;
+  font-family: "Quicksand", sans-serif;
+  font-weight: 600;
+  color: #222222;
+  padding-left: 0%;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  /* padding-right: ; */
+  background: url("./images/arrow-down.svg") 100% 50% no-repeat #fff;
+}
+.inputUsername {
+  width: 100%;
+  border: none;
+  border-bottom: 1px solid #eeeeee;
+  outline: none;
+  /* border: none; */
+}
+.password-wrapper {
+  position: relative;
+  /* width: 100%; */
+  border-bottom: 1px solid #eeeeee;
+}
+
+.inputPassword {
+  width: 100%;
+  border: none;
+  /* border-bottom: 1px solid #eeeeee; */
+  padding-right: 30px; /* leave space for the image */
+  outline: none;
+}
+
+.preview-icon {
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 15px;
+  width: 22px;
+  cursor: pointer;
+}
+
+.forgot {
+  padding-top: 5px;
+  display: block;
+  width: 100%;
+  font-size: 14px;
+  color: #1f7a54;
+  text-align: right;
+}
+.remember-me {
+  margin-top: 36px;
+
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  color: #333;
+}
+
+.remember-me input {
+  display: none; /* Hide default checkbox */
+}
+
+.custom-checkbox {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #ccc;
+  border-radius: 3px;
+  margin-right: 8px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+/* Checked style */
+.remember-me input:checked + .custom-checkbox {
+  background-color: #1f7a54;
+  border-color: #1f7a54;
+}
+
+.remember-me input:checked + .custom-checkbox::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.log-in-btn {
+  display: block;
+  margin: 34px auto 24px auto;
+  width: 215px;
+  height: 40px;
+  background-color: #3fd28b;
+  border: none;
+  box-shadow: 0px 3px 5px #0000003d;
+  cursor: pointer; /* Makes it clear it's clickable */
+}
+.stateSel {
+  font-family: "Quicksand", sans-serif;
+  font-size: 500;
+  margin-bottom: 36px;
+}
+.selectDis {
+  margin-bottom: 56px;
+}
+.inputuser {
+  margin-bottom: 33px;
+}
+.footer {
+  height: 40px;
+  background-color: #e0e1e1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: #333;
+}
+.footerlogo {
+  margin-right: 16px;
+}
+.verticalBar {
+  margin-right: 16px;
+}
+.companyName {
+  font-weight: 700;
+  margin-right: 11px;
+  margin-left: 11px;
+}
+.aboutContact {
+  margin-bottom: 24px;
+  display: flex;
+  justify-content: center;
+  color: #1f7a54;
+}
+::placeholder {
+  font-family: "Quicksand", sans-serif;
+  font-weight: 500;
+  font-size: 16px;
 }
