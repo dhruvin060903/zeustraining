@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Login</title>
+    <title>DASHBOARD</title>
     <link rel="stylesheet" href="./style/style.css" />
   </head>
   <body>
@@ -17,29 +17,149 @@
         <div class="inActiveItem">USERS</div>
         <div class="inActiveItem">REPORTS</div>
         <div class="inActiveItem">ADMIN</div>
-        <div class="alert-wrapper">
-          <div class="alert-bell"></div>
-          <div class="alert-badge">2</div>
+        <div class="outsideAlert">
+          <div class="alert-wrapper">
+            <div class="alert-bell"></div>
+            <div class="alert-badge">2</div>
+          </div>
         </div>
-        <div class="announcement-wrapper">
-          <div class="announcement-bell"></div>
-          <div class="announcement-badge">1</div>
+        <div
+          class="outsideAnnouncement"
+          onmouseup="displayAnnouncements()"
+          onmouseenter="displayAnnouncements()"
+          onmouseleave="hideAnnouncements()"
+        >
+          <div class="announcement-wrapper">
+            <div class="announcement-bell"></div>
+            <div class="announcement-badge">1</div>
+          </div>
         </div>
         <!-- <img src="./images/announcements.svg" alt="announcement" /> -->
-
-        <img src="./images/account_circle.svg" alt="account" />
-        <div  
-        class="hamburger-menu"     
-        onmouseover="toggleMouse()">
-
+        <div class="accountImgOutside">
+          <div class="account-wrapper">
+            <div class="account-bell"></div>
+            <div class="account-badge">T</div>
+          </div>
+        </div>
+        <div
+          class="hamburger-menu menuImg"
+          onmouseover="displayMenu()"
+          onclick="displayMenu()"
+          onmouseleave="hideMenu()"
+        >
           <img
-          src="./images/hamburger-menu.svg"
-          alt="account"
-      
-          
+            src="./images/hamburger-menu.svg"
+            alt="account"
+            height="28px"
+            width="35px"
           />
         </div>
       </nav>
+      <div
+        class="navbarForSmallScreen"
+        id="navbarForSmallScreen"
+        onmouseup="displayMenu()"
+        onmouseenter="displayMenu()"
+        onmouseleave="hideMenu()"
+      >
+        <div class="smallNavitem">DASHBOARD</div>
+        <div
+          onmouseenter="displaySubMenu(courseCatalog, content)"
+          onmouseleave="hideSubMenu(courseCatalog,content)"
+          onmouseover="displaySubMenu(courseCatalog,content)"
+        >
+          <div id="content" class="smallNavitem">
+            CONTENT
+            <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
+          </div>
+          <div
+            id="courseCatalog"
+            class="submenu"
+            onmouseleave="hideSubMenu(courseCatalog, content)"
+          >
+            COURSE CATALOG
+          </div>
+        </div>
+
+        <div
+          onmouseenter="displaySubMenu(userSub, users)"
+          onmouseleave="hideSubMenu(userSub,users)"
+          onmouseover="displaySubMenu(userSub,users)"
+        >
+          <div id="users" class="smallNavitem">
+            USERS
+            <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
+          </div>
+          <div
+            id="userSub"
+            class="submenu"
+            onmouseleave="hideSubMenu(userSub, users)"
+          >
+            User Sub
+          </div>
+        </div>
+        <div
+          onmouseenter="displaySubMenu(reportSub, reports)"
+          onmouseleave="hideSubMenu(reportSub,reports)"
+          onmouseover="displaySubMenu(reportSub,reports)"
+        >
+          <div id="reports" class="smallNavitem">
+            REPORTS
+            <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
+          </div>
+          <div
+            id="reportSub"
+            class="submenu"
+            onmouseleave="hideSubMenu(reportSub, reports)"
+          >
+            Report Sub
+          </div>
+        </div>
+
+        <div
+          onmouseenter="displaySubMenu(adminSub, admin)"
+          onmouseleave="hideSubMenu(adminSub,admin)"
+          onmouseover="displaySubMenu(adminSub,admin)"
+        >
+          <div id="admin" class="smallNavitem">
+            ADMIN
+            <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
+          </div>
+          <div
+            id="adminSub"
+            class="submenu"
+            onmouseleave="hideSubMenu(adminSub, admin)"
+          >
+            Report Sub
+          </div>
+        </div>
+      </div>
+      <div
+        class="announcementstPopup"
+        id="announcementstPopup"
+        onmouseup="displayAnnouncements()"
+        onmouseenter="displayAnnouncements()"
+        onmouseleave="hideAnnouncements()"
+      >
+        <div
+          id="announcementstPopupInner"
+          class="announcementstPopupInner"
+        ></div>
+        <div class="showAll">
+          <div class="showAllText">SHOW ALL</div>
+          <div class="verticalBar"></div>
+          <div class="showAllText">CREATE NEW</div>
+        </div>
+      </div>
+      <div class="notificationPopup" id="notificationPopup">
+        <!-- onmouseup="displayAnnouncements()"
+        onmouseenter="displayAnnouncements()"
+        onmouseleave="hideAnnouncements()" -->
+        <div id="notificationPopupInner" class="notificationPopupInner"></div>
+        <div class="showAllNotification">
+          <div class="showAllText">SHOW ALL</div>
+        </div>
+      </div>
     </div>
     <div class="main-content-border">
       <div class="main-content">

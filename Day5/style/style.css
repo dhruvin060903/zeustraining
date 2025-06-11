@@ -47,9 +47,8 @@ body {
   right: 0;
   background-color: #25313f;
   color: white;
-  height: 56px;
-  z-index: 1000;
-  overflow: hidden;
+  height: 58px;
+  z-index: 1;
 }
 
 .header::before {
@@ -90,11 +89,169 @@ body {
   .hamburger-menu {
     display: block;
   }
+  .navbar .accountImgOutside {
+    padding-right: 14.5px;
+  }
+  .header {
+    border-bottom: 2px solid #31B9E4;
+  }
+  .menuImg {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-left: 14.5px;
+    padding-right: 24px;
+    z-index: 1;
+    height: 70px;
+  }
 }
+.notificationPopup {
+  display: block;
+  width: 315px;
+  height: 582px;
+  position: absolute;
+  top: 60px;
+  border-top: transparent;
+  padding-top: 4px;
+  margin-right: 136px;
+  right: 0;
+  color: black;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.announcementstPopup {
+  display: none;
+  width: 315px;
+  height: 582px;
+  position: absolute;
+  top: 60px;
+  border-top: transparent;
+  padding-top: 4px;
+  margin-right: 136px;
+  right: 0;
+  color: black;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.announcementstPopupInner {
+  height: 534px;
+  overflow-y: scroll;
+}
+
+.notificationPopupInner {
+  height: 534px;
+  overflow-y: scroll;
+}
+
+.announcementItemCard {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  border-bottom: 1px solid rgba(34, 34, 34, 0.1215686275);
+  position: relative;
+}
+.announcementItemCard .announcementHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+}
+.announcementItemCard .announcementHeader .Pa {
+  color: #6E6E6E;
+}
+.announcementItemCard .announcementTitle {
+  font-size: 14px;
+}
+.announcementItemCard .announcementCourse {
+  font-size: 12px;
+  color: #6E6E6E;
+}
+.announcementItemCard .announcementfiles {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #6E6E6E;
+}
+
+.showAllNotification {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  display: grid;
+  width: 100%;
+  bottom: 0;
+  color: #1F7A54;
+  font-size: 14px;
+  background-color: #FFFFFF;
+  height: 40px;
+}
+
+.showAll {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  display: grid;
+  grid-template-columns: 1fr 1px 1fr;
+  width: 100%;
+  bottom: 0;
+  color: #1F7A54;
+  font-size: 14px;
+  margin-bottom: 0;
+  background-color: #FFFFFF;
+  height: 40px;
+}
+.showAll .showAllText {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.showAll .verticalBar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-left: 1px solid rgba(0, 0, 0, 0.1215686275);
+  padding-top: 9px;
+  height: 22px;
+}
+
+.navbarForSmallScreen {
+  display: none;
+  width: 280px;
+  position: absolute;
+  top: 60px;
+  border-top: transparent;
+  padding-top: 4px;
+  margin-right: 16px;
+  right: 0;
+  color: black;
+  background-color: white;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.smallNavitem {
+  color: #1F7A54;
+  font-size: 14px;
+  padding: 15px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.submenu {
+  display: none;
+  color: #1F7A54;
+  font-size: 14px;
+  padding: 15px;
+  padding-left: 32px;
+}
+
 .navbar {
   display: flex;
-  padding-right: 24px;
-  gap: 32px;
   align-items: center;
   font-size: 14px;
 }
@@ -102,12 +259,16 @@ body {
 .activeItem {
   padding-bottom: 19px;
   padding-top: 19px;
+  padding-right: 16px;
+  padding-left: 16px;
   border-bottom: 4px solid white;
 }
 
 .inActiveItem {
   padding-bottom: 20px;
   padding-top: 15px;
+  padding-right: 16px;
+  padding-left: 16px;
   color: #3fd28b;
 }
 
@@ -115,6 +276,24 @@ body {
   position: relative;
   width: 28px;
   height: 33px;
+}
+
+.outsideAnnouncement {
+  padding-left: 11.5px;
+  padding-right: 10.5px;
+  height: 70px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.outsideAlert {
+  padding-left: 16px;
+  padding-right: 11.5px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .alert-bell {
@@ -138,6 +317,48 @@ body {
   width: 17px;
   height: 17px;
   font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.accountImgOutside {
+  padding-left: 10.5px;
+  padding-right: 21px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.account-wrapper {
+  position: relative;
+  width: 31px;
+  height: 31px;
+}
+
+.account-bell {
+  background-image: url("../images/account_circle.svg"); /* your bell icon path */
+  background-repeat: no-repeat;
+  /* background-size: contain; */
+  width: 32px;
+  height: 32px;
+  position: absolute;
+  top: 6px;
+  left: -2px;
+}
+
+.account-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: white;
+  color: #222222;
+  border-radius: 50%;
+  width: 17px;
+  height: 17px;
+  font-size: 8px;
   font-weight: bold;
   display: flex;
   justify-content: center;
@@ -180,6 +401,7 @@ body {
 .main-content-border {
   /* width: 100%;
   height: 90vh; */
+  position: relative;
   margin-top: 56px;
   padding: 24px;
   box-sizing: border-box;

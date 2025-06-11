@@ -50,8 +50,8 @@ body {
   background-color: #25313f;
   color: white;
   height: 56px;
-  z-index: 1000;
-  overflow: hidden;
+  /* z-index: 1000; */
+  /* overflow: hidden; */
 }
 
 .header::before {
