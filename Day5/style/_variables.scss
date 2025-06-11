@@ -1,0 +1,12 @@
+@mixin justifyContentBetween{
+     display: flex;
+  justify-content: space-between;
+}
+@mixin justifyContentCenter{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+$smallFontSize:12px;
+$fontName:"Quicksand";
+$bottomBorder :1px solid rgb(0, 0, 0, 0.12);

@@ -2,13 +2,7 @@
 <html>
   <head>
     <title>Login</title>
-    <link rel="stylesheet" href="index.css" />
-    <script>
-      function togglePassword() {
-        const password = document.getElementById("password");
-        password.type = password.type === "password" ? "text" : "password";
-      }
-    </script>
+    <link rel="stylesheet" href="./style/style.css" />
   </head>
   <body>
     <div class="header">
@@ -17,7 +11,7 @@
         alt="headerLogo"
         class="headerLogo"
       />
-      <div class="navbar">
+      <nav class="navbar">
         <div class="activeItem">DASHBOARD</div>
         <div class="inActiveItem">CONTENT</div>
         <div class="inActiveItem">USERS</div>
@@ -34,7 +28,18 @@
         <!-- <img src="./images/announcements.svg" alt="announcement" /> -->
 
         <img src="./images/account_circle.svg" alt="account" />
-      </div>
+        <div  
+        class="hamburger-menu"     
+        onmouseover="toggleMouse()">
+
+          <img
+          src="./images/hamburger-menu.svg"
+          alt="account"
+      
+          
+          />
+        </div>
+      </nav>
     </div>
     <div class="main-content-border">
       <div class="main-content">
@@ -70,7 +75,7 @@
               />
               <div class="cardTextContent">
                 <div class="cardTitle">
-                  <span>Acceleration</span>
+                  <span class="title">Acceleration</span>
                   <img
                     src="./images/favourite.svg"
                     alt="favourite"
@@ -79,14 +84,16 @@
                 </div>
 
                 <div class="grade">
-                  <span>Physics | Grage 7 + 2</span>
+                  <span>Physics | Grage 7 +<span class="green">2</span></span>
                 </div>
                 <div class="ULT">
                   <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
                 </div>
                 <div class="selectClass">
                   <select id="course" name="course" class="course">
-                    <option value="courseName">Course Name</option>
+                    <option value="Mr. Frank's Class B">
+                      Mr. Frank's Class B
+                    </option>
                   </select>
                 </div>
                 <div class="cardDates">
@@ -121,7 +128,7 @@
               />
               <div class="cardTextContent">
                 <div class="cardTitle">
-                  <span>Acceleration</span>
+                  <span class="title">Displacement, Velocity and Speed</span>
                   <img
                     src="./images/favourite.svg"
                     alt="favourite"
@@ -130,18 +137,20 @@
                 </div>
 
                 <div class="grade">
-                  <span>Physics | Grage 7 + 2</span>
+                  <span>Physics | Grage 7 +<span class="green">3</span></span>
                 </div>
                 <div class="ULT">
                   <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
                 </div>
                 <div class="selectClass">
-                  <select id="course" name="course" class="course">
+                  <select id="course" name="course" class="course noClass">
+                    <option value="courseName">No Classes</option>
+
                     <option value="courseName">Course Name</option>
                   </select>
                 </div>
                 <div class="cardDates">
-                  <span>50 Students | 21-jan-2020 - 21-Aug-2020</span>
+                  <!-- <span>50 Students | 21-jan-2020 - 21-Aug-2020</span> -->
                 </div>
               </div>
             </div>
@@ -156,9 +165,13 @@
                 <img
                   src="./images/manage course.svg"
                   alt="manage course"
-                  class="gardeImg"
+                  class="gardeImg disabledIcons"
                 />
-                <img src="./images/grade submissions.svg" alt="gradeimg" />
+                <img
+                  src="./images/grade submissions.svg"
+                  alt="gradeimg"
+                  class="disabledIcons"
+                />
                 <img src="./images/reports.svg" alt="report" class="report" />
               </div>
             </div>
@@ -168,7 +181,10 @@
               <img class="cardImg" src="./images/imageMask.svg" alt="cardimg" />
               <div class="cardTextContent">
                 <div class="cardTitle">
-                  <span>Acceleration</span>
+                  <span class="title"
+                    >Introduction to Biology: Micro organisms and how they
+                    affec...</span
+                  >
                   <img
                     src="./images/favourite.svg"
                     alt="favourite"
@@ -177,18 +193,18 @@
                 </div>
 
                 <div class="grade">
-                  <span>Physics | Grage 7 + 2</span>
+                  <span>Physics | Grage 7 +<span class="green">1</span></span>
                 </div>
                 <div class="ULT">
                   <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
                 </div>
                 <div class="selectClass">
                   <select id="course" name="course" class="course">
-                    <option value="courseName">Course Name</option>
+                    <option value="All Classes">All Classes</option>
                   </select>
                 </div>
                 <div class="cardDates">
-                  <span>50 Students | 21-jan-2020 - 21-Aug-2020</span>
+                  <span>300 Students</span>
                 </div>
               </div>
             </div>
@@ -203,14 +219,19 @@
                 <img
                   src="./images/manage course.svg"
                   alt="manage course"
-                  class="gardeImg"
+                  class="gardeImg disabledIcons"
                 />
-                <img src="./images/grade submissions.svg" alt="gradeimg" />
+                <img
+                  src="./images/grade submissions.svg"
+                  alt="gradeimg"
+                  class="disabledIcons"
+                />
                 <img src="./images/reports.svg" alt="report" class="report" />
               </div>
             </div>
           </div>
           <div class="card">
+            <div class="expire">EXPIRED</div>
             <div class="cardcontent">
               <img
                 class="cardImg"
@@ -219,27 +240,31 @@
               />
               <div class="cardTextContent">
                 <div class="cardTitle">
-                  <span>Acceleration</span>
+                  <span class="title"
+                    >Introduction to High School Mathematics</span
+                  >
                   <img
-                    src="./images/favourite.svg"
+                    src="./images/favourite -2.svg"
                     alt="favourite"
-                    class="favouriteImg"
+                    class="favouriteImg emptyStar"
                   />
                 </div>
 
                 <div class="grade">
-                  <span>Physics | Grage 7 + 2</span>
+                  <span>Physics | Grage 7 +<span class="green">3</span></span>
                 </div>
                 <div class="ULT">
                   <span><b>4</b> Units <b>18</b> Lessons <b>24</b> Topics</span>
                 </div>
                 <div class="selectClass">
                   <select id="course" name="course" class="course">
-                    <option value="courseName">Course Name</option>
+                    <option value="Mr. Frank's Class A">
+                      Mr. Frank's Class A
+                    </option>
                   </select>
                 </div>
                 <div class="cardDates">
-                  <span>50 Students | 21-jan-2020 - 21-Aug-2020</span>
+                  <span>44 Students | 14-Oct-2019 - 20-Oct-2020</span>
                 </div>
               </div>
             </div>
@@ -264,20 +289,22 @@
         </div>
       </div>
     </div>
-    <div class="aboutContact">About | Contact Us</div>
-
-    <div class="footer">
-      <img
-        src="./images/logo used in footer.svg"
-        alt="logo"
-        class="footerlogo"
-      />
-      <p class="verticalBar">|</p>
-      <p>
-        Copyright © 2020-2021<span class="companyName"
-          >Zeus System Pvt. Ltd.</span
-        >All rights reserved
-      </p>
+    <div class="footerMain">
+      <div class="aboutContact">About | Contact Us</div>
+      <div class="footer">
+        <img
+          src="./images/logo used in footer.svg"
+          alt="logo"
+          class="footerlogo"
+        />
+        <p class="verticalBar">|</p>
+        <p>
+          Copyright © 2020-2021<span class="companyName"
+            >Zeus System Pvt. Ltd.</span
+          >All rights reserved
+        </p>
+      </div>
     </div>
+    <script src="./script/script.js"></script>
   </body>
 </html>
