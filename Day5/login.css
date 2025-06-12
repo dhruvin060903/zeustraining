@@ -28,9 +28,7 @@
 html,
 body {
   height: 100%;
-  margin: 0;
-  display: flex;
-  flex-direction: column;
+  
 }
 body {
   font-family: "Quicksand", sans-serif;
@@ -39,12 +37,21 @@ body {
   background-color: #eeeeee;
   margin: 0;
 }
-
-.loginWrapper {
-  height: 96vh;
-  margin-top: 50px;
+.main {
+  height:100%;
+  justify-content: space-between;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+}
+.footerMain{
+  
+  /* justify-self: flex-end; */
+  margin-top: 32px;
+}
+.loginWrapper {
+  margin-top:108px;
+  display: flex;
+  align-items: flex-start;
   justify-content: center;
 }
 
@@ -71,8 +78,9 @@ body {
   background-color: #25313f;
   color: white;
   height: 56px;
-  z-index: 1000;
+  z-index: 1;
   overflow: hidden;
+   border-bottom: 2px solid #31B9E4;
 }
 
 .header::before {
@@ -109,7 +117,6 @@ body {
 }
 .cardHeader > p {
   font-weight: 500;
-  font-size: 24px;
 }
 .backImg {
   position: absolute;
@@ -122,12 +129,12 @@ body {
 .cardHeader p {
   margin: 0;
   font-weight: bold;
-  font-size: 16px;
+  font-size: 24px;
 }
 .radioButtons {
   margin-top: 34px;
   font-weight: 500;
-
+  font-size: 16px;
   /* margin: 0; */
   display: flex;
   padding-left: 0;
@@ -139,7 +146,7 @@ body {
   position: relative;
   padding-left: 24px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 16px;
   user-select: none;
   color: #333;
   display: flex;
@@ -245,10 +252,10 @@ select {
 }
 .remember-me {
   margin-top: 36px;
-
+  font-weight: 600;
   display: flex;
   align-items: center;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   user-select: none;
   color: #333;
@@ -287,7 +294,9 @@ select {
 }
 .log-in-btn {
   display: block;
+  font-family: "Quicksand", sans-serif;
   margin: 34px auto 24px auto;
+  font-size: 14px;
   width: 215px;
   height: 40px;
   background-color: #3fd28b;
@@ -327,7 +336,7 @@ select {
   margin-left: 11px;
 }
 .aboutContact {
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   display: flex;
   justify-content: center;
   color: #1f7a54;

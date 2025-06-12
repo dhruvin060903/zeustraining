@@ -17,10 +17,15 @@
         <div class="inActiveItem">USERS</div>
         <div class="inActiveItem">REPORTS</div>
         <div class="inActiveItem">ADMIN</div>
-        <div class="outsideAlert">
+        <div
+          class="outsideAlert"
+          onmouseup="displayAlert()"
+          onmouseenter="displayAlert()"
+          onmouseleave="hideAlert()"
+        >
           <div class="alert-wrapper">
-            <div class="alert-bell"></div>
-            <div class="alert-badge">2</div>
+            <div class="alert-bell" id="alert-bell"></div>
+            <div class="alert-badge" id="alert-badge">2</div>
           </div>
         </div>
         <div
@@ -30,8 +35,8 @@
           onmouseleave="hideAnnouncements()"
         >
           <div class="announcement-wrapper">
-            <div class="announcement-bell"></div>
-            <div class="announcement-badge">1</div>
+            <div class="announcement-bell" id="announcement-bell"></div>
+            <div class="announcement-badge" id="announcement-badge">1</div>
           </div>
         </div>
         <!-- <img src="./images/announcements.svg" alt="announcement" /> -->
@@ -49,6 +54,7 @@
         >
           <img
             src="./images/hamburger-menu.svg"
+            id="hamburgerMenuImg"
             alt="account"
             height="28px"
             width="35px"
@@ -151,10 +157,13 @@
           <div class="showAllText">CREATE NEW</div>
         </div>
       </div>
-      <div class="notificationPopup" id="notificationPopup">
-        <!-- onmouseup="displayAnnouncements()"
-        onmouseenter="displayAnnouncements()"
-        onmouseleave="hideAnnouncements()" -->
+      <div
+        class="notificationPopup"
+        id="notificationPopup"
+        onmouseover="displayAlert()"
+        onmouseenter="displayAlert()"
+        onmouseleave="hideAlert()"
+      >
         <div id="notificationPopupInner" class="notificationPopupInner"></div>
         <div class="showAllNotification">
           <div class="showAllText">SHOW ALL</div>
@@ -186,7 +195,7 @@
           </div>
         </div>
         <div class="card-container">
-          <div class="card">
+          <!-- <div class="card">
             <div class="cardcontent">
               <img
                 class="cardImg"
@@ -238,8 +247,8 @@
                 <img src="./images/reports.svg" alt="report" class="report" />
               </div>
             </div>
-          </div>
-          <div class="card">
+          </div> -->
+          <!-- <div class="card">
             <div class="cardcontent">
               <img
                 class="cardImg"
@@ -270,7 +279,6 @@
                   </select>
                 </div>
                 <div class="cardDates">
-                  <!-- <span>50 Students | 21-jan-2020 - 21-Aug-2020</span> -->
                 </div>
               </div>
             </div>
@@ -295,8 +303,8 @@
                 <img src="./images/reports.svg" alt="report" class="report" />
               </div>
             </div>
-          </div>
-          <div class="card">
+          </div> -->
+          <!-- <div class="card">
             <div class="cardcontent">
               <img class="cardImg" src="./images/imageMask.svg" alt="cardimg" />
               <div class="cardTextContent">
@@ -349,8 +357,8 @@
                 <img src="./images/reports.svg" alt="report" class="report" />
               </div>
             </div>
-          </div>
-          <div class="card">
+          </div> -->
+          <!-- <div class="card">
             <div class="expire">EXPIRED</div>
             <div class="cardcontent">
               <img
@@ -405,7 +413,7 @@
                 <img src="./images/reports.svg" alt="report" class="report" />
               </div>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>

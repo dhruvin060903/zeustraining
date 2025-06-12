@@ -81,6 +81,15 @@ body {
 .hamburger-menu {
   display: none;
 }
+@media only screen and (min-width: 1024px) {
+  .header .notificationPopup{
+    right:120px;
+  }
+  .header .announcementstPopup{
+  right: 72px;
+
+  }
+}
 @media only screen and (max-width: 1023px) {
   .navbar .activeItem {
     display: none;
@@ -117,17 +126,18 @@ body {
 
 
 .notificationPopup{
-   display: block;
+   display: none;
   width: 315px;
   height: 582px;
   // max-height: 582px;
   position: absolute;
   top:60px;
   border-top: transparent;
-  padding-top: 4px;
+  
+  // padding-top: 4px;
   // margin-top: 4px;
-  margin-right: 136px;
-  right: 0;
+  // margin-right: 188px;
+  right: 188px;
   color: black;
  background-color: white;
 // z-index: 1000;
@@ -143,8 +153,8 @@ box-shadow: 0 4px 6px rgb(0, 0, 0,0.1);
   border-top: transparent;
   padding-top: 4px;
   // margin-top: 4px;
-  margin-right: 136px;
-  right: 0;
+  right: 136px;
+  
   color: black;
  background-color: white;
 // z-index: 1000;
@@ -176,6 +186,8 @@ box-shadow: 0 4px 6px rgb(0, 0, 0,0.1);
     }
   }
   .announcementTitle{
+    display: flex;
+    justify-content: space-between;
     font-size: 14px;
   }
   .announcementCourse{
@@ -203,13 +215,16 @@ box-shadow: 0 4px 6px rgb(0, 0, 0,0.1);
    font-size: 14px;
   
   background-color: #FFFFFF;
-  
+    filter: drop-shadow(0px 1px 6px #0000003D);
+
   height: 40px;
  
 }
 
 .showAll{
   @include justifyContentCenter();
+    filter: drop-shadow(0px 1px 6px #0000003D);
+
   position: absolute;
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
@@ -310,7 +325,7 @@ padding-right: 16px;
 .outsideAlert{
   padding-left: 16px;
   padding-right: 11.5px;
-  height: 100%;
+  height: 70px;
   @include justifyContentCenter;
 }
 
@@ -564,6 +579,9 @@ select {
   color: #666666;
   align-self: flex-start;
   margin-top: 7px;
+}
+.ULT > span > b{
+  color:#222222;
 }
 .selectClass {
   width: 100%;

@@ -1,0 +1,59 @@
+[
+  {
+    "description": "No classes will be held on 21st Nov",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": true,
+    "bgColor": "#fff"
+  },
+  {
+    "description": "Guest lecture on Geometry on 20th September",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  },
+  {
+    "description": "Additional course materials available on request",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "course": "Mathematics 101",
+    "done": true,
+    "bgColor": "#fff"
+  },
+  {
+    "description": "No classes will be held on 25th Dec",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  },
+  {
+    "description": "No classes will be held on 21st Nov",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": true,
+    "bgColor": "#fff"
+  },
+  {
+    "description": "Guest lecture on Geometry on 20th September",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  },
+  {
+    "description": "Additional course materials available on request",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "course": "Mathematics 101",
+    "done": true,
+    "bgColor": "#fff"
+  },
+  {
+    "description": "No classes will be held on 25th Dec",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  },
+  {
+    "description": "No classes will be held on 25th Dec",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "course": "Mathematics 101",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  }
+]

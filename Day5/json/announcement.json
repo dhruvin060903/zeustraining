@@ -1,0 +1,43 @@
+[
+  {
+    "name": "Wilson Kumar",
+    "description": "No classes will be held on 21st Nov",
+    "files": 2,
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": true,
+    "bgColor": "#fff"
+  },
+  {
+    "name": "Samson White",
+    "description": "Guest lecture on Geometry on 20th September",
+    "files": 2,
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  },
+  {
+    "name": "Wilson Kumar",
+    "description": "Additional course materials available on request",
+    "date": "15-Sep-2018 at 07:21 pm",
+    "course": "Mathematics 101",
+    "done": true,
+    "bgColor": "#fff"
+  },
+  {
+    "name": "Wilson Kumar",
+    "description": "No classes will be held on 25th Dec",
+    "files": 0,
+    "date": "15-Sep-2018 at 07:21 pm",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  },
+  {
+    "name": "Wilson Kumar",
+    "description": "No classes will be held on 25th Dec",
+    "files": 0,
+    "date": "15-Sep-2018 at 07:21 pm",
+    "course": "Mathematics 101",
+    "done": false,
+    "bgColor": "#FFFFEE"
+  }
+]
