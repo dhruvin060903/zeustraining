@@ -69,40 +69,41 @@
         onmouseleave="hideMenu()"
       >
         <div class="smallNavitem">DASHBOARD</div>
+
         <div
+          id="content"
+          class="smallNavitem"
           onmouseenter="displaySubMenu(courseCatalog, content)"
           onmouseleave="hideSubMenu(courseCatalog,content)"
           onmouseover="displaySubMenu(courseCatalog,content)"
         >
-          <div id="content" class="smallNavitem">
-            CONTENT
-            <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
-          </div>
-          <div
-            id="courseCatalog"
-            class="submenu"
-            onmouseleave="hideSubMenu(courseCatalog, content)"
-          >
-            COURSE CATALOG
-          </div>
+          CONTENT
+          <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
+        </div>
+        <div
+          id="courseCatalog"
+          class="submenu"
+          onmouseleave="hideSubMenu(courseCatalog, content)"
+        >
+          COURSE CATALOG
         </div>
 
         <div
+          id="users"
+          class="smallNavitem"
           onmouseenter="displaySubMenu(userSub, users)"
           onmouseleave="hideSubMenu(userSub,users)"
           onmouseover="displaySubMenu(userSub,users)"
         >
-          <div id="users" class="smallNavitem">
-            USERS
-            <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
-          </div>
-          <div
-            id="userSub"
-            class="submenu"
-            onmouseleave="hideSubMenu(userSub, users)"
-          >
-            User Sub
-          </div>
+          USERS
+          <img src="./images/keyboard_arrow_down.svg" alt="keyboard-down" />
+        </div>
+        <div
+          id="userSub"
+          class="submenu"
+          onmouseleave="hideSubMenu(userSub, users)"
+        >
+          User Sub
         </div>
         <div
           onmouseenter="displaySubMenu(reportSub, reports)"
@@ -433,6 +434,6 @@
         </p>
       </div>
     </div>
-    <script src="./script/script.js"></script>
+    <script src="./TypeScript/newScript.js"></script>
   </body>
 </html>

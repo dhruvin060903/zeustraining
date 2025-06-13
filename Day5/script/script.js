@@ -146,13 +146,19 @@ function hideSubMenu(component1, component2) {
     collection[0].src = "./images/keyboard_arrow_down.svg";
 }
 function displayMenu() {
-    document.getElementById("navbarForSmallScreen").style.display = "block";
+    // document.getElementById("navbarForSmallScreen").style.display = "block";
+    document.getElementById("navbarForSmallScreen").style.maxHeight = "500px";
+
+
     const collection = document.getElementById("hamburgerMenuImg");
     collection.src = "./images/hamburger-menu-white.svg";
 }
 
 function hideMenu() {
-    document.getElementById("navbarForSmallScreen").style.display = "none";
+    // document.getElementById("navbarForSmallScreen").style.display = "none";
+    document.getElementById("navbarForSmallScreen").style.maxHeight = "0px";
+
+
     const collection = document.getElementById("hamburgerMenuImg");
     collection.src = "./images/hamburger-menu.svg";
 }

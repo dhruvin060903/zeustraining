@@ -215,16 +215,18 @@ box-shadow: 0 4px 6px rgb(0, 0, 0,0.1);
    font-size: 14px;
   
   background-color: #FFFFFF;
-    filter: drop-shadow(0px 1px 6px #0000003D);
+   box-shadow: 0px 1px 6px #0000003D;
 
-  height: 40px;
+  height: 48px;
  
 }
 
 .showAll{
   @include justifyContentCenter();
-    filter: drop-shadow(0px 1px 6px #0000003D);
+  box-shadow: 0px 1px 6px #0000003D;
+  box-shadow: 0px 1px 6px #0000003D;
 
+  height: 48px;
   position: absolute;
   display: grid;
   grid-template-columns: 1fr 1px 1fr;
@@ -238,7 +240,6 @@ box-shadow: 0 4px 6px rgb(0, 0, 0,0.1);
   // display: none;
   background-color: #FFFFFF;
   
-  height: 40px;
   .showAllText{
   height: 100%;
     width: 100%;
@@ -254,18 +255,20 @@ box-shadow: 0 4px 6px rgb(0, 0, 0,0.1);
 }
 
 .navbarForSmallScreen{
-  display: none;
+  // display: none;
   width: 280px;
+  max-height: 0px;
   position: absolute;
   top:60px;
-  border-top: transparent;
-  padding-top: 4px;
+  overflow: hidden;
+  // border-top: transparent;
+  // padding-top: 4px;
   // margin-top: 4px;
   margin-right: 16px;
   right: 0;
   color: black;
  background-color: white;
-// z-index: 1000;
+ transition: all 0.5s ease;
 box-shadow: 0 4px 6px rgb(0, 0, 0,0.1);
 }
 
