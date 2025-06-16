@@ -109,6 +109,17 @@ function hideAlert() {
         badge.style.display = "flex";
     }
 }
+function changeSelectionColor(select) {
+    if (select) {
+        if (select.value === "No Classes") {
+            console.log(select);
+            select.classList.add("noClass");
+        }
+        else {
+            select.classList.remove("noClass");
+        }
+    }
+}
 function intailizeAnnouncement(announcements) {
     var container = document.getElementById("announcementstPopupInner");
     var allHtml = "";
@@ -133,8 +144,8 @@ function intailizeNotification(notifications) {
 }
 function cardIntialization(cards) {
     var cardHTML = "";
-    cards.forEach(function (card) {
-        cardHTML += "\n        <div class=\"card\">\n          ".concat(card.expired ? "<div class=\"expire\">EXPIRED</div>" : "", "\n          <div class=\"cardcontent\">\n            <img class=\"cardImg\" src=\"").concat(card.image, "\" alt=\"cardimg\" />\n            <div class=\"cardTextContent\">\n              <div class=\"cardTitle\">\n                <span class=\"title\">").concat(card.title, "</span>\n                <img src=\"").concat(card.favourite, "\" alt=\"favourite\" class=\"favouriteImg ").concat(card.favourite.includes('-2') ? 'emptyStar' : '', "\" />\n              </div>\n    \n              <div class=\"grade\">\n                <span>").concat(card.grade, " +<span class=\"green\">").concat(card.greenCount, "</span></span>\n              </div>\n              \n              <div class=\"ULT\">\n                <span><b>").concat(card.units, "</b> Units <b>").concat(card.lessons, "</b> Lessons <b>").concat(card.topics, "</b> Topics</span>\n              </div>\n              \n              <div class=\"selectClass\">\n                <select class=\"course ").concat(card.classes.includes('No Classes') ? 'noClass' : '', "\">\n                  ").concat(card.classes.map(function (cls) { return "<option value=\"".concat(cls, "\">").concat(cls, "</option>"); }).join(''), "\n                </select>\n              </div>\n              \n              <div class=\"cardDates\">\n                <span>").concat(card.studentsInfo, "</span>\n              </div>\n            </div>\n          </div>\n          <div class=\"cardIcons\">\n            <div class=\"cardIconsMargin\">\n              <img src=\"./images/preview.svg\" alt=\"previewimg\" class=\"previewimg\" />\n              <img src=\"./images/manage course.svg\" alt=\"manage course\" class=\"gardeImg ").concat(card.icons.manage ? "" : "disabledIcons", "\" />\n              <img src=\"./images/grade submissions.svg\" alt=\"gradeimg\" class=\"").concat(card.icons.grade ? "" : "disabledIcons", "\" />\n              <img src=\"./images/reports.svg\" alt=\"report\" class=\"report\" />\n            </div>\n          </div>\n        </div>\n      ");
+    cards.forEach(function (card, index) {
+        cardHTML += "\n        <div class=\"card\">\n          ".concat(card.expired ? "<div class=\"expire\">EXPIRED</div>" : "", "\n          <div class=\"cardcontent\">\n            <img class=\"cardImg\" src=\"").concat(card.image, "\" alt=\"cardimg\" />\n            <div class=\"cardTextContent\">\n              <div class=\"cardTitle\">\n                <span class=\"title\">").concat(card.title, "</span>\n                <img src=\"").concat(card.favourite, "\" alt=\"favourite\" class=\"favouriteImg ").concat(card.favourite.includes('-2') ? 'emptyStar' : '', "\" />\n              </div>\n    \n              <div class=\"grade\">\n                <span>").concat(card.grade, " +<span class=\"green\">").concat(card.greenCount, "</span></span>\n              </div>\n              \n              <div class=\"ULT\">\n                <span><b>").concat(card.units, "</b> Units <b>").concat(card.lessons, "</b> Lessons <b>").concat(card.topics, "</b> Topics</span>\n              </div>\n              \n              <div class=\"selectClass\">\n                <select class=\"course ").concat(card.classes[0] === 'No Classes' ? 'noClass' : '', "\"  id= \"courseSelection").concat(index, "\"  onclick=\"changeSelectionColor(courseSelection").concat(index, ")\">\n                  ").concat(card.classes.map(function (cls) { return "<option value=\"".concat(cls, "\">").concat(cls, "</option>"); }).join(''), "\n                </select>\n              </div>\n              \n              <div class=\"cardDates\">\n                <span>").concat(card.studentsInfo, "</span>\n              </div>\n            </div>\n          </div>\n          <div class=\"cardIcons\">\n            <div class=\"cardIconsMargin\">\n              <img src=\"./images/preview.svg\" alt=\"previewimg\" class=\"previewimg\" />\n              <img src=\"./images/manage course.svg\" alt=\"manage course\" class=\"gardeImg ").concat(card.icons.manage ? "" : "disabledIcons", "\" />\n              <img src=\"./images/grade submissions.svg\" alt=\"gradeimg\" class=\"").concat(card.icons.grade ? "" : "disabledIcons", "\" />\n              <img src=\"./images/reports.svg\" alt=\"report\" class=\"report\" />\n            </div>\n          </div>\n        </div>\n      ");
     });
     // Append to DOM
     var component = document.querySelector(".card-container");
