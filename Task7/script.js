@@ -89,7 +89,6 @@ class ChildManager {
     }
 }
 
-// Bootstrap
 const background = new BackgroundManager();
 const child = new ChildManager(background);
 background.appendChild(child.getElement());
@@ -99,7 +98,7 @@ const child2 = new ChildManager(background2);
 background2.appendChild(child2.getElement());
 const background3 = new BackgroundManager();
 const child3 = new ChildManager(background3);
-background3.appendChild(child3 .getElement());
+background3.appendChild(child3.getElement());
 const background4 = new BackgroundManager();
 const child4 = new ChildManager(background4);
 
