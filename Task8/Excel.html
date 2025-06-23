@@ -1,11 +1,214 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
-    <link rel="stylesheet" href="style.css" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Excel Grid</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+      }
 
-    <title>Excel</title>
+      .container {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        height: 91vh;
+      }
+
+      .controls {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .control-group {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 4px;
+      }
+
+      input[type="number"] {
+        width: 80px;
+        padding: 4px 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      .stats {
+        margin-top: 15px;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+        font-size: 14px;
+      }
+
+      .canvas-container {
+        position: relative;
+        width: 100%;
+        height: 77vh;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .grid-wrapper {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      canvas {
+        display: block;
+        cursor: default;
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .cell-editor {
+        position: absolute;
+        border: 2px solid #4285f4;
+        background: white;
+        font-family: Arial, sans-serif;
+        font-size: 12px;
+        padding: 2px 4px;
+        outline: none;
+        z-index: 1000;
+        display: none;
+      }
+
+      /* Custom Scrollbar Styles */
+      .scrollbar {
+        position: absolute;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+        z-index: 100;
+      }
+
+      .scrollbar-horizontal {
+        bottom: 0;
+        left: 0;
+        right: 20px;
+        height: 18px;
+        overflow-x: auto;
+        overflow-y: hidden;
+      }
+
+      .scrollbar-vertical {
+        top: 0;
+        right: 0;
+        bottom: 20px;
+        width: 18px;
+        overflow-x: hidden;
+        overflow-y: auto;
+      }
+
+      .scrollbar-track {
+        background: transparent;
+      }
+
+      .scrollbar-horizontal .scrollbar-track {
+        height: 100%;
+        width: 5000px; /* Large width for horizontal scrolling */
+      }
+
+      .scrollbar-vertical .scrollbar-track {
+        width: 100%;
+        height: 100000px; /* Large height for vertical scrolling */
+      }
+
+      .scrollbar-corner {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 18px;
+        height: 18px;
+        background: #f0f0f0;
+        border: 1px solid #ccc;
+      }
+
+      /* Webkit scrollbar styling */
+      .scrollbar::-webkit-scrollbar {
+        width: 16px;
+        height: 16px;
+      }
+
+      .scrollbar::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      .scrollbar::-webkit-scrollbar-thumb {
+        background: #c1c1c1;
+        border-radius: 3px;
+      }
+
+      .scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #a8a8a8;
+      }
+
+      .scrollbar::-webkit-scrollbar-corner {
+        background: #f1f1f1;
+      }
+
+      button {
+        padding: 8px 16px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        cursor: pointer;
+        font-size: 14px;
+      }
+
+      button:hover {
+        background: #f0f0f0;
+      }
+
+      .info {
+        color: #666;
+        font-size: 12px;
+      }
+    </style>
   </head>
   <body>
-    <script src="./main.js"></script>
+    <div class="container">
+      <div class="controls">
+        <div class="control-group">
+          <button onclick="grid.loadSampleData()">Load Sample Data</button>
+        </div>
+      </div>
+
+      <div class="canvas-container">
+        <div class="grid-wrapper">
+          <canvas id="gridCanvas"></canvas>
+          <input type="text" class="cell-editor" id="cellEditor" />
+
+          <!-- Custom Scrollbars -->
+          <div class="scrollbar scrollbar-horizontal" id="horizontalScrollbar">
+            <div class="scrollbar-track"></div>
+          </div>
+
+          <div class="scrollbar scrollbar-vertical" id="verticalScrollbar">
+            <div class="scrollbar-track"></div>
+          </div>
+
+          <div class="scrollbar-corner"></div>
+        </div>
+      </div>
+
+      <div class="stats" id="selectionStats">No selection</div>
+    </div>
+
+    <script src="temp.js"></script>
   </body>
 </html>

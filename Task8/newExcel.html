@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dynamic Excel Grid with Fixed Headers</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+        }
+
+        #grid-wrapper { /* New wrapper for fixed headers and scrollable content */
+            width: 90vw;
+            height: 80vh;
+            border: 1px solid #d1d5db;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            background-color: #ffffff;
+            position: relative; /* Important for absolute positioning of headers */
+            overflow: hidden; /* To clip content outside boundaries */
+        }
+
+        /* These CSS variables will be set by JavaScript based on HEADER_WIDTH/HEIGHT */
+        #grid-wrapper {
+            --header-width: 50px; /* Default, will be updated by JS */
+            --header-height: 28px; /* Default, will be updated by JS */
+        }
+
+        #top-left-corner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: var(--header-width);
+            height: var(--header-height);
+            background-color: #f8f8f8;
+            border-right: 1px solid #d1d5db;
+            border-bottom: 1px solid #d1d5db;
+            z-index: 20; /* Ensure it's on top */
+            border-top-left-radius: 0.5rem; /* Match wrapper */
+        }
+
+        #column-header-container {
+            position: absolute;
+            top: 0;
+            left: var(--header-width); /* Starts after row header */
+            right: 0;
+            height: var(--header-height);
+            overflow: hidden; /* Important for horizontal scroll synchronization */
+            z-index: 10; /* Ensure it's on top of cells */
+        }
+
+        #row-header-container {
+            position: absolute;
+            top: var(--header-height); /* Starts after column header */
+            left: 0;
+            bottom: 0;
+            width: var(--header-width);
+            overflow: hidden; /* Important for vertical scroll synchronization */
+            z-index: 10; /* Ensure it's on top of cells */
+        }
+
+        #grid-container {
+            /* This is the main scrollable area for the cells */
+            position: absolute;
+            top: var(--header-height);
+            left: var(--header-width);
+            right: 0;
+            bottom: 0;
+            overflow: auto; /* Essential for scroll virtualization of cells */
+            background-color: #ffffff;
+        }
+
+        .grid-canvas-tile {
+            position: absolute; /* Positioned dynamically by JS within grid-container */
+            background-color: #ffffff;
+        }
+
+        .header-canvas { /* Style for header canvases */
+            position: absolute;
+            top: 0;
+            left: 0;
+            /* Canvas elements themselves don't need border-radius, their parent container already has it */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+    <div id="grid-wrapper">
+        <div id="top-left-corner"></div>
+        <div id="column-header-container">
+            <canvas id="column-header-canvas" class="header-canvas"></canvas>
+        </div>
+        <div id="row-header-container">
+            <canvas id="row-header-canvas" class="header-canvas"></canvas>
+        </div>
+        <div id="grid-container">
+            <!-- Canvas elements will be injected here by JavaScript -->
+            <div id="grid-content-sizer" style="position: absolute; top: 0; left: 0; pointer-events: none;"></div>
+        </div>
+    </div>
+
+    <script src="newExcel.js"></script>
+</body>
+</html>
