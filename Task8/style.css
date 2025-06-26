@@ -1,127 +1,177 @@
- body {
-        font-family: "Arial", sans-serif;
-        margin: 0;
-        padding: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f0f2f5;
-      }
+body {
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f0f2f5;
+}
 
-      #grid-wrapper {
-        width: 100%;
-        height: 98vh;
-        background-color: #ffffff;
-        position: relative;
-        overflow: hidden;
-      }
+#grid-wrapper {
+  width: 100%;
+  height: 98vh;
+  background-color: #ffffff;
+  position: relative;
+  overflow: hidden;
+}
 
-      #top-left-corner {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 50px;
-        height: 28px;
-        background-color: #f8f8f8;
-        border-right: 1px solid #d1d5db;
-        border-bottom: 1px solid #d1d5db;
-        z-index: 20;
-        border-top-left-radius: 0.5rem;
-      }
+#top-left-corner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 49.5px;
+  height: 27px;
+  background-color: #f8f8f8;
+  border-right: 1px solid #d1d5db;
+  border-bottom: 1px solid #d1d5db;
+  z-index: 20;
+  border-top-left-radius: 0.5rem;
+}
 
-      #column-header-container {
-        position: absolute;
-        top: 0;
-        left: 50px;
-        right: 0;
-        height: 28px;
-        overflow: hidden;
-        z-index: 10;
-      }
+#column-header-container {
+  position: absolute;
+  top: 0;
+  left: 50px;
+  right: 0;
+  height: 28px;
+  overflow: hidden;
+  z-index: 10;
+}
 
-      #row-header-container {
-        position: absolute;
-        top: 28px;
-        left: 0;
-        bottom: 0;
-        width: 50px;
-        overflow: hidden;
-        z-index: 10;
-      }
+#row-header-container {
+  position: absolute;
+  top: 28px;
+  left: 0;
+  bottom: 0;
+  width: 50px;
+  overflow: hidden;
+  z-index: 10;
+}
 
-      #grid-container {
-        position: absolute;
-        top: 28px;
-        left: 50px;
-        right: 0;
-        bottom: 0;
-        overflow: auto;
-        background-color: #ffffff;
-      }
+#grid-container {
+  position: absolute;
+  top: 28px;
+  left: 50px;
+  right: 0;
+  bottom: 0;
+  overflow: auto;
+  background-color: #ffffff;
+}
 
-      .grid-canvas-tile {
-        position: absolute;
-        background-color: #ffffff;
-      }
+.grid-canvas-tile {
+  position: absolute;
+  background-color: #ffffff;
+}
 
-      .header-canvas {
-        position: absolute;
-        top: 0;
-        left: 0;
-      }
+.header-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
-      #resizer-line {
-        border: none;
-        width: 2px;
-        position: absolute;
-        z-index: 100;
-        display: none;
-        /* background-color: #22c55e; */
-      }
+#resizer-line {
+  border: none;
+  width: 2px;
+  position: absolute;
+  z-index: 100;
+  display: none;
+  /* background-color: #22c55e; */
+}
 
-      .vertical-line {
-        background: repeating-linear-gradient(
-          to bottom,
-          green 0px,
-          green 4px,
-          transparent 4px,
-          transparent 8px
-        );
-      }
+.vertical-line {
+  background: repeating-linear-gradient(
+    to bottom,
+    green 0px,
+    green 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
 
-      .horizontal-line {
-        background: repeating-linear-gradient(
-          to right,
-          green 0px,
-          green 4px,
-          transparent 4px,
-          transparent 8px
-        );
-      }
+.horizontal-line {
+  background: repeating-linear-gradient(
+    to right,
+    green 0px,
+    green 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
 
-      .resize-handle {
-        position: absolute;
-        z-index: 15;
-      }
+.resize-handle {
+  position: absolute;
+  z-index: 15;
+}
 
-      .col-resize-handle {
-        width: 4px;
-        height: 28px;
-        cursor: col-resize;
-        background: transparent;
-      }
+.col-resize-handle {
+  width: 4px;
+  height: 28px;
+  cursor: col-resize;
+  background: transparent;
+}
 
-      .row-resize-handle {
-        width: 50px;
-        height: 4px;
-        cursor: row-resize;
-        background: transparent;
-      }
+.row-resize-handle {
+  width: 50px;
+  height: 4px;
+  cursor: row-resize;
+  background: transparent;
+}
 
-      .col-resize-handle:hover {
-        background-color: rgba(34, 197, 94, 0.3);
-      }
+.col-resize-handle:hover {
+  background-color: rgba(34, 197, 94, 0.3);
+}
 
-      .row-resize-handle:hover {
-        background-color: rgba(34, 197, 94, 0.3);
-      }
+.row-resize-handle:hover {
+  background-color: rgba(34, 197, 94, 0.3);
+}
+.collapsHandle {
+  width: 4px;
+  margin-left: 2px;
+  background-color: white;
+  border-right: 1px solid #d1d5db;
+  box-sizing: border-box;
+}
+.collapsHandleHorizontal {
+  height: 4px;
+  margin-top: 2px;
+  background-color: white;
+  border-bottom: 1px solid #d1d5db;
+  box-sizing: border-box;
+}
+/* Add this CSS to your existing style.css file */
+
+.cell-input {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  background: white;
+  border: 2px solid #137e43 !important;
+  outline: none !important;
+  padding: 2px 4px;
+  margin: 0;
+  resize: none;
+}
+
+.cell-input:focus {
+  border: 2px solid #137e43 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 1px #137e43;
+}
+
+/* Make sure canvas tiles are clickable */
+.grid-canvas-tile {
+  cursor: cell;
+}
+
+.grid-canvas-tile:hover {
+  cursor: cell;
+}
+.canvas-selection-border {
+    border: 2px solid #137E43;
+    position: absolute;
+    pointer-events: none;
+    z-index: 10;
+    box-sizing: border-box;
+}
+  

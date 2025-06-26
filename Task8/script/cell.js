@@ -30,4 +30,7 @@ export class Cell {
     setValue(value) {
         this.value = value;
     }
+    hasContent() {
+        return this.value && this.value.trim() !== '';
+    }
 }

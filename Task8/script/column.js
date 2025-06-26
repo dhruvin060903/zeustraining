@@ -1,3 +1,6 @@
+import {
+    DEFAULT_COLUMN_WIDTH,
+} from './config.js';
 /**
  * Converts column index (0-based) to spreadsheet-style name (e.g., 0 → A, 26 → AA).
  * @param {number} colIndex
@@ -25,7 +28,7 @@ export class GridColumn {
      * @param {number} index - Column index
      * @param {number} [width=100] - Initial width
      */
-    constructor(index, width = 100) {
+    constructor(index, width = DEFAULT_COLUMN_WIDTH) {
         /** @type {number} */
         this.index = index;
 
@@ -41,6 +44,6 @@ export class GridColumn {
      * @param {number} width
      */
     setWidth(width) {
-        this.width = Math.max(20, width);
+        this.width = Math.max(0.5, width);
     }
 }

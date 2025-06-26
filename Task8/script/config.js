@@ -1,0 +1,10 @@
+export const TOTAL_ROWS = 100000;
+export const TOTAL_COLUMNS = 1000;
+export const DEFAULT_ROW_HEIGHT = 28;
+export const DEFAULT_COLUMN_WIDTH = 100;
+export const HEADER_HEIGHT = 28;
+export const HEADER_WIDTH = 50;
+export const VISIBLE_ROWS_PER_CANVAS_TILE = 40;
+export const VISIBLE_COLS_PER_CANVAS_TILE = 15;
+export const TILE_BUFFER_ROWS = 1;
+export const TILE_BUFFER_COLS = 1;

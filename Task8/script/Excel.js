@@ -3,16 +3,19 @@ import { GridColumn } from "./column.js";
 import { Cell } from "./cell.js";
 import { CanvasTile } from "./canvasTile.js";
 import { getColumnName } from "./column.js";
-const TOTAL_ROWS = 100000;
-const TOTAL_COLUMNS = 1000;
-const DEFAULT_ROW_HEIGHT = 28;
-const DEFAULT_COLUMN_WIDTH = 100;
-const HEADER_HEIGHT = 28;
-const HEADER_WIDTH = 50;
-const VISIBLE_ROWS_PER_CANVAS_TILE = 40;
-const VISIBLE_COLS_PER_CANVAS_TILE = 15;
-const TILE_BUFFER_ROWS = 1;
-const TILE_BUFFER_COLS = 1;
+import {
+    TOTAL_ROWS,
+    TOTAL_COLUMNS,
+    DEFAULT_ROW_HEIGHT,
+    DEFAULT_COLUMN_WIDTH,
+    HEADER_HEIGHT,
+    HEADER_WIDTH,
+    VISIBLE_ROWS_PER_CANVAS_TILE,
+    VISIBLE_COLS_PER_CANVAS_TILE,
+    TILE_BUFFER_ROWS,
+    TILE_BUFFER_COLS
+} from './config.js';
+
 
 // for reduce multiple calling
 function debounce(func, delay) {
@@ -37,7 +40,7 @@ class Grid {
         this.columns = [];
         this.rows = [];
         this.cells = new Map();
-           
+
         for (let i = 0; i < TOTAL_COLUMNS; i++) {
             this.columns.push(new GridColumn(i));
         }
@@ -59,7 +62,9 @@ class Grid {
         this.resizeIndex = -1;
         this.resizeStartPos = 0;
         this.resizeStartSize = 0;
-
+        this.selectedCell = null;
+        this.isEditing = false;
+        this.cellInput = null;
         this.initializeResizeHandling();
         this.updateHeaderCanvasSizes();
         this.drawHeaders();
@@ -70,7 +75,178 @@ class Grid {
 
         this.handleResize = debounce(this.HandleResize.bind(this), 100);
         window.addEventListener('resize', this.handleResize);
+        this.container.addEventListener('click', this.handleCellClick.bind(this));
+        this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
     }
+    handleCellClick(e) {
+        if (e.target.classList.contains('grid-canvas-tile')) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const tileRow = parseInt(e.target.dataset.tileRow);
+            const tileCol = parseInt(e.target.dataset.tileCol);
+
+            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                this.selectCell(cellCoords.row, cellCoords.col);
+            }
+        }
+    }
+
+    handleCellDoubleClick(e) {
+        if (e.target.classList.contains('grid-canvas-tile')) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const tileRow = parseInt(e.target.dataset.tileRow);
+            const tileCol = parseInt(e.target.dataset.tileCol);
+
+            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                this.startCellEdit(cellCoords.row, cellCoords.col);
+            }
+        }
+    }
+
+    getCellFromPosition(x, y, tileRow, tileCol) {
+        const startGlobalRow = tileRow * VISIBLE_ROWS_PER_CANVAS_TILE;
+        const startGlobalCol = tileCol * VISIBLE_COLS_PER_CANVAS_TILE;
+
+        let currentY = 0;
+        for (let r = startGlobalRow; r < Math.min(startGlobalRow + VISIBLE_ROWS_PER_CANVAS_TILE, TOTAL_ROWS); r++) {
+            const rowHeight = this.getRowHeight(r);
+            if (y >= currentY && y < currentY + rowHeight) {
+                let currentX = 0;
+                for (let c = startGlobalCol; c < Math.min(startGlobalCol + VISIBLE_COLS_PER_CANVAS_TILE, TOTAL_COLUMNS); c++) {
+                    const colWidth = this.getColumnWidth(c);
+                    if (x >= currentX && x < currentX + colWidth) {
+                        return { row: r, col: c };
+                    }
+                    currentX += colWidth;
+                }
+            }
+            currentY += rowHeight;
+        }
+        return null;
+    }
+
+    selectCell(row, col) {
+        if (this.isEditing) {
+            this.finishCellEdit();
+        }
+
+        const previousSelection = this.selectedCell;
+        this.selectedCell = { row, col };
+
+        // Redraw affected tiles
+        if (previousSelection) {
+            this.redrawCellInTiles(previousSelection.row, previousSelection.col);
+        }
+        this.redrawCellInTiles(row, col);
+    }
+
+    startCellEdit(row, col) {
+        if (this.isEditing) {
+            this.finishCellEdit();
+        }
+
+        this.selectCell(row, col);
+        this.isEditing = true;
+
+        // Create input element
+        this.cellInput = document.createElement('input');
+        this.cellInput.type = 'text';
+        this.cellInput.className = 'cell-input';
+
+        const cell = this.getCell(row, col);
+        this.cellInput.value = cell.value || '';
+
+        // Position the input
+        this.positionCellInput(row, col);
+
+        // Add event listeners
+        this.cellInput.addEventListener('blur', this.finishCellEdit.bind(this));
+        this.cellInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this.finishCellEdit();
+                e.preventDefault();
+            } else if (e.key === 'Escape') {
+                this.cancelCellEdit();
+                e.preventDefault();
+            }
+        });
+
+        this.container.appendChild(this.cellInput);
+        this.cellInput.focus();
+        this.cellInput.select();
+    }
+
+    positionCellInput(row, col) {
+        let left = 0;
+        for (let c = 0; c < col; c++) {
+            left += this.getColumnWidth(c);
+        }
+
+        let top = 0;
+        for (let r = 0; r < row; r++) {
+            top += this.getRowHeight(r);
+        }
+
+        const colWidth = this.getColumnWidth(col);
+        const rowHeight = this.getRowHeight(row);
+
+        this.cellInput.style.position = 'absolute';
+        this.cellInput.style.left = `${left}px`;
+        this.cellInput.style.top = `${top}px`;
+        this.cellInput.style.width = `${colWidth - 1}px`;
+        this.cellInput.style.height = `${rowHeight - 1}px`;
+        this.cellInput.style.border = '2px solid #137E43';
+        this.cellInput.style.outline = 'none';
+        this.cellInput.style.fontSize = '12px';
+        this.cellInput.style.padding = '2px';
+        this.cellInput.style.zIndex = '1000';
+    }
+
+    finishCellEdit() {
+        if (!this.isEditing || !this.cellInput) return;
+
+        const newValue = this.cellInput.value;
+        const cell = this.getCell(this.selectedCell.row, this.selectedCell.col);
+        const oldValue = cell.value || '';
+
+        // Only update and redraw if value actually changed
+        if (newValue !== oldValue) {
+            cell.setValue(newValue);
+            // Redraw only the edited cell
+            this.redrawCellInTiles(this.selectedCell.row, this.selectedCell.col);
+        }
+
+        this.container.removeChild(this.cellInput);
+        this.cellInput = null;
+        this.isEditing = false;
+    }
+
+    cancelCellEdit() {
+        if (!this.isEditing || !this.cellInput) return;
+
+        this.container.removeChild(this.cellInput);
+        this.cellInput = null;
+        this.isEditing = false;
+    }
+
+    redrawCellInTiles(row, col) {
+        const tileRow = Math.floor(row / VISIBLE_ROWS_PER_CANVAS_TILE);
+        const tileCol = Math.floor(col / VISIBLE_COLS_PER_CANVAS_TILE);
+        const tileKey = `${tileRow}_${tileCol}`;
+
+        const tile = this.canvasTiles.get(tileKey);
+        if (tile) {
+            tile.drawSingleCell(row, col); // Use optimized method
+        }
+    }
+
 
     getColumnWidth(index) {
         return this.columns[index]?.width || DEFAULT_COLUMN_WIDTH;
@@ -100,6 +276,10 @@ class Grid {
             this.cells.set(key, new Cell(rowIndex, colIndex));
         }
         return this.cells.get(key);
+    }
+    cellHasContent(row, col) {
+        const cell = this.getCell(row, col);
+        return cell.hasContent();
     }
 
     initializeResizeHandling() {
@@ -142,8 +322,18 @@ class Grid {
                 handle.className = 'resize-handle col-resize-handle';
                 handle.style.left = `${handleX}px`;
                 handle.style.top = '0px';
+                // handle.style.marginLeft = '2px';
+
                 handle.dataset.type = 'column';
                 handle.dataset.index = c;
+                if (colWidth <= 0.5) {
+                    handle.classList.add("collapsHandle");
+                }
+                else {
+
+                    handle.classList.remove("collapsHandle");
+                }
+
 
                 handle.addEventListener('mousedown', this.handleResizeStart.bind(this));
                 colHeaderContainer.appendChild(handle);
@@ -181,7 +371,13 @@ class Grid {
                 handle.style.top = `${handleY}px`;
                 handle.dataset.type = 'row';
                 handle.dataset.index = r;
+                if (rowHeight <= 0.5) {
+                    handle.classList.add("collapsHandleHorizontal");
+                }
+                else {
 
+                    handle.classList.remove("collapsHandleHorizontal");
+                }
                 handle.addEventListener('mousedown', this.handleResizeStart.bind(this));
                 rowHeaderContainer.appendChild(handle);
                 this.resizeHandles.push(handle);
@@ -205,7 +401,6 @@ class Grid {
 
         const resizerLine = document.getElementById('resizer-line');
         resizerLine.style.display = 'block';
-
         if (this.resizeType === 'column') {
             resizerLine.className = 'vertical-line';
             resizerLine.style.width = '2px';
@@ -228,9 +423,9 @@ class Grid {
 
         const resizerLine = document.getElementById('resizer-line');
 
-        if (this.resizeType === 'column') {
+        if (this.resizeType === 'column' && this.resizeStartPos - this.resizeStartSize <= e.clientX) {
             resizerLine.style.left = `${e.clientX}px`;
-        } else {
+        } else if (this.resizeType === 'row' && this.resizeStartPos - this.resizeStartSize < e.clientY) {
             resizerLine.style.top = `${e.clientY}px`;
         }
     }
@@ -340,7 +535,8 @@ class Grid {
             colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
             colCtx.strokeRect(currentX, 0, colWidth, HEADER_HEIGHT);
             colCtx.fillStyle = '#4b5563';
-            colCtx.fillText(getColumnName(c), currentX + colWidth / 2, HEADER_HEIGHT / 2);
+            if (colWidth > 10)
+                colCtx.fillText(getColumnName(c), currentX + colWidth / 2, HEADER_HEIGHT / 2);
 
             currentX += colWidth;
         }
@@ -376,7 +572,8 @@ class Grid {
             rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
             rowCtx.strokeRect(0, currentY, HEADER_WIDTH, rowHeight);
             rowCtx.fillStyle = '#4b5563';
-            rowCtx.fillText(`${r + 1}`, HEADER_WIDTH / 2, currentY + rowHeight / 2);
+            if (rowHeight > 10)
+                rowCtx.fillText(`${r + 1}`, HEADER_WIDTH / 2, currentY + rowHeight / 2);
 
             currentY += rowHeight;
         }
