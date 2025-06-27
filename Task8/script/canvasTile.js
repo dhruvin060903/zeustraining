@@ -84,7 +84,7 @@ export class CanvasTile {
         // this.drawCellBackgrounds(ctx);
 
         // ✅ Update or hide selection border div
-        this.updateSelectionDiv();
+        // this.updateSelectionDiv();
 
         // Draw grid lines
         ctx.strokeStyle = '#e5e7eb';
@@ -161,7 +161,7 @@ export class CanvasTile {
     }
 
     // Add this new method to CanvasTile class
-    
+
 
     // Add this new method to CanvasTile class
     drawCellContent(ctx) {
@@ -215,7 +215,7 @@ export class CanvasTile {
     }
     drawSingleCell(row, col) {
         // Ensure the cell is within this tile's range
-        // console.log(row,col)
+        console.log(row, col)
         if (
             row < this.startGlobalRow || row >= this.endGlobalRow ||
             col < this.startGlobalCol || col >= this.endGlobalCol
@@ -251,17 +251,17 @@ export class CanvasTile {
         ctx.lineTo(currentX + colWidth, currentY + rowHeight - 0.5);
         ctx.stroke();
         // Redraw background
-        const isSelected = this.grid.selectedCell?.row === row && this.grid.selectedCell?.col === col;
-        // console.log(isSelected)
-        if (isSelected) {
-            this.selectionDiv.style.display = 'block';
-            this.selectionDiv.style.left = `${currentX}px`;
-            this.selectionDiv.style.top = `${currentY}px`;
-            this.selectionDiv.style.width = `${colWidth}px`;
-            this.selectionDiv.style.height = `${rowHeight}px`;
-        } else {
-            this.selectionDiv.style.display = 'none';
-        }
+        // const isSelected = this.grid.selectedCell?.row === row && this.grid.selectedCell?.col === col;
+        // // console.log(isSelected)
+        // if (isSelected && this.grid.selectionManager.activeSelection?.type === 'range') {
+        //     this.selectionDiv.style.display = 'block';
+        //     this.selectionDiv.style.left = `${currentX}px`;
+        //     this.selectionDiv.style.top = `${currentY}px`;
+        //     this.selectionDiv.style.width = `${colWidth}px`;
+        //     this.selectionDiv.style.height = `${rowHeight}px`;
+        // } else {
+        //     this.selectionDiv.style.display = 'none';
+        // }
 
         // Redraw grid lines
         console.log(this.grid.cellHasContent(row, col), !this.grid.isEditing);
@@ -269,7 +269,6 @@ export class CanvasTile {
         // Redraw content
         if (
             this.grid.cellHasContent(row, col) &&
-            !this.grid.isEditing &&
             this.grid.getColumnWidth(col) > 10
         ) {
             const cell = this.grid.getCell(row, col);

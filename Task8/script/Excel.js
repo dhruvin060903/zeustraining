@@ -3,6 +3,8 @@ import { GridColumn } from "./column.js";
 import { Cell } from "./cell.js";
 import { CanvasTile } from "./canvasTile.js";
 import { getColumnName } from "./column.js";
+import { SelectionManager, CellSelection, ColumnSelection, RowSelection, RangeSelection } from "./Selection.js";
+
 import {
     TOTAL_ROWS,
     TOTAL_COLUMNS,
@@ -55,7 +57,12 @@ class Grid {
         this.colHeaderCtx = this.colHeaderCanvas.getContext('2d');
         this.rowHeaderCanvas = document.getElementById('row-header-canvas');
         this.rowHeaderCtx = this.rowHeaderCanvas.getContext('2d');
+        this.selectionManager = new SelectionManager(this);
+        this.selectionManager.grid = this; // Make grid accessible
+        window.grid = this; // Make grid globally accessible for selections
 
+        this.isSelecting = false;
+        this.selectionStart = null;
         this.resizeHandles = [];
         this.isResizing = false;
         this.resizeType = null;
@@ -75,10 +82,18 @@ class Grid {
 
         this.handleResize = debounce(this.HandleResize.bind(this), 100);
         window.addEventListener('resize', this.handleResize);
-        this.container.addEventListener('click', this.handleCellClick.bind(this));
         this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
+        this.container.addEventListener('click', this.handleClick.bind(this));
+        // this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
+        this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        this.container.addEventListener('mousemove', this.handleMouseMoveForSelection.bind(this));
+        this.container.addEventListener('mouseup', this.handleMouseUpForSelection.bind(this));
+
+        // Add header click listeners
+        this.colHeaderCanvas.addEventListener('click', this.handleColumnHeaderClick.bind(this));
+        this.rowHeaderCanvas.addEventListener('click', this.handleRowHeaderClick.bind(this));
     }
-    handleCellClick(e) {
+    handleClick(e) {
         if (e.target.classList.contains('grid-canvas-tile')) {
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
@@ -89,8 +104,99 @@ class Grid {
 
             const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
             if (cellCoords) {
+                // Check if there's an active RangeSelection and if the click is within it
+                if (this.selectionManager.activeSelection?.type === 'range' &&
+                    this.selectionManager.activeSelection.contains(cellCoords.row, cellCoords.col)) {
+                    // Clicked within the existing range selection, do nothing to preserve it
+                    // console.log("erer")
+                    console.log("single clcik")
+                    return;
+                }
+
+                // Clicked outside the range or no range selection, select the single cell
                 this.selectCell(cellCoords.row, cellCoords.col);
+
+            } else {
+                // Clicked outside any valid cell, clear selection
+                this.selectionManager.clearSelection();
             }
+        }
+    }
+    handleMouseMoveForSelection(e) {
+        if (this.isSelecting && this.selectionStart && e.target.classList.contains('grid-canvas-tile')) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const tileRow = parseInt(e.target.dataset.tileRow);
+            const tileCol = parseInt(e.target.dataset.tileCol);
+
+            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                // Create range selection
+                const rangeSelection = new RangeSelection(
+                    this.selectionStart.row,
+                    this.selectionStart.col,
+                    cellCoords.row,
+                    cellCoords.col
+                );
+                this.selectionManager.setSelection(rangeSelection);
+            }
+        }
+    }
+
+    handleMouseUpForSelection(e) {
+        this.isSelecting = false;
+        // this.selectionStart = null;
+        this.selectionManager.renderSelection();
+        this.finishCellEdit();
+    }
+
+    handleMouseDown(e) {
+        if (e.target.classList.contains('grid-canvas-tile')) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const tileRow = parseInt(e.target.dataset.tileRow);
+            const tileCol = parseInt(e.target.dataset.tileCol);
+
+            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                this.isSelecting = true;
+                this.selectionStart = cellCoords;
+                e.preventDefault();
+            }
+        }
+    }
+
+    handleColumnHeaderClick(e) {
+        const rect = this.colHeaderCanvas.getBoundingClientRect();
+        const x = e.clientX - rect.left + this.container.scrollLeft;
+
+        let currentX = 0;
+        for (let c = 0; c < TOTAL_COLUMNS; c++) {
+            const colWidth = this.getColumnWidth(c);
+            if (x >= currentX && x < currentX + colWidth) {
+                this.selectColumn(c);
+                break;
+            }
+            currentX += colWidth;
+        }
+    }
+
+    handleRowHeaderClick(e) {
+        const rect = this.rowHeaderCanvas.getBoundingClientRect();
+        const y = e.clientY - rect.top + this.container.scrollTop;
+
+        let currentY = 0;
+        for (let r = 0; r < TOTAL_ROWS; r++) {
+            const rowHeight = this.getRowHeight(r);
+            if (y >= currentY && y < currentY + rowHeight) {
+                this.selectRow(r);
+                break;
+            }
+            currentY += rowHeight;
         }
     }
 
@@ -136,7 +242,6 @@ class Grid {
         if (this.isEditing) {
             this.finishCellEdit();
         }
-
         const previousSelection = this.selectedCell;
         this.selectedCell = { row, col };
 
@@ -144,14 +249,56 @@ class Grid {
         if (previousSelection) {
             this.redrawCellInTiles(previousSelection.row, previousSelection.col);
         }
-        this.redrawCellInTiles(row, col);
+        const cellSelection = new CellSelection(row, col);
+        this.selectionManager.setSelection(cellSelection);
+
+        // Keep the selected cell reference for editing
+        this.selectedCell = { row, col };
+        // this.redrawCellInTiles(row, col);
+
+    }
+    // selectCell(row, col) {
+    //     if (this.isEditing) {
+    //         this.finishCellEdit();
+    //     }
+
+    //     const previousSelection = this.selectedCell;
+    //     this.selectedCell = { row, col };
+
+    //     // Redraw affected tiles
+    //     if (previousSelection) {
+    //         this.redrawCellInTiles(previousSelection.row, previousSelection.col);
+    //     }
+    //     this.redrawCellInTiles(row, col);
+    // }
+    selectColumn(col) {
+        if (this.isEditing) {
+            this.finishCellEdit();
+        }
+
+        const columnSelection = new ColumnSelection(col);
+        this.selectionManager.setSelection(columnSelection);
+        this.selectedCell = null;
+    }
+
+    selectRow(row) {
+        if (this.isEditing) {
+            this.finishCellEdit();
+        }
+
+        const rowSelection = new RowSelection(row);
+        this.selectionManager.setSelection(rowSelection);
+        this.selectedCell = null;
     }
 
     startCellEdit(row, col) {
         if (this.isEditing) {
             this.finishCellEdit();
         }
-
+        if (this.selectionManager.activeSelection &&
+            this.selectionManager.activeSelection.type !== 'cell') {
+            return;
+        }
         this.selectCell(row, col);
         this.isEditing = true;
 
@@ -167,7 +314,7 @@ class Grid {
         this.positionCellInput(row, col);
 
         // Add event listeners
-        this.cellInput.addEventListener('blur', this.finishCellEdit.bind(this));
+        // this.cellInput.addEventListener('blur', this.finishCellEdit.bind(this));
         this.cellInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') {
                 this.finishCellEdit();
@@ -177,6 +324,7 @@ class Grid {
                 e.preventDefault();
             }
         });
+        this.selectionManager.selectionOverlay.style.display = 'none';
 
         this.container.appendChild(this.cellInput);
         this.cellInput.focus();
@@ -210,8 +358,8 @@ class Grid {
     }
 
     finishCellEdit() {
+        // console.log("sdfds")
         if (!this.isEditing || !this.cellInput) return;
-
         const newValue = this.cellInput.value;
         const cell = this.getCell(this.selectedCell.row, this.selectedCell.col);
         const oldValue = cell.value || '';
@@ -219,6 +367,7 @@ class Grid {
         // Only update and redraw if value actually changed
         if (newValue !== oldValue) {
             cell.setValue(newValue);
+            console.log(newValue)
             // Redraw only the edited cell
             this.redrawCellInTiles(this.selectedCell.row, this.selectedCell.col);
         }
@@ -226,6 +375,8 @@ class Grid {
         this.container.removeChild(this.cellInput);
         this.cellInput = null;
         this.isEditing = false;
+        this.selectionManager.renderSelection();
+
     }
 
     cancelCellEdit() {
@@ -460,6 +611,7 @@ class Grid {
         }
         this.drawHeaders();
         this.createResizeHandles();
+        this.selectionManager.renderSelection();
         // this.updateContentSizer();
     }
 
@@ -533,7 +685,7 @@ class Grid {
 
             colCtx.fillStyle = '#f8f8f8';
             colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
-            colCtx.strokeRect(currentX, 0, colWidth, HEADER_HEIGHT);
+            colCtx.strokeRect(currentX - 0.5, 0, colWidth, HEADER_HEIGHT);
             colCtx.fillStyle = '#4b5563';
             if (colWidth > 10)
                 colCtx.fillText(getColumnName(c), currentX + colWidth / 2, HEADER_HEIGHT / 2);
@@ -570,7 +722,7 @@ class Grid {
 
             rowCtx.fillStyle = '#f8f8f8';
             rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
-            rowCtx.strokeRect(0, currentY, HEADER_WIDTH, rowHeight);
+            rowCtx.strokeRect(0, currentY - 0.5, HEADER_WIDTH, rowHeight);
             rowCtx.fillStyle = '#4b5563';
             if (rowHeight > 10)
                 rowCtx.fillText(`${r + 1}`, HEADER_WIDTH / 2, currentY + rowHeight / 2);
@@ -584,10 +736,13 @@ class Grid {
     HandleResize() {
         this.updateHeaderCanvasSizes();
         this.HandleScroll();
+        this.selectionManager.renderSelection();
     }
 
     HandleScroll() {
         this.renderVisibleTiles();
+        this.selectionManager.handleScroll();
+
     }
 
     renderVisibleTiles() {
