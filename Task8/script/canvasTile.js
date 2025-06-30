@@ -1,4 +1,3 @@
-
 import {
     TOTAL_ROWS,
     TOTAL_COLUMNS,
@@ -291,6 +290,70 @@ export class CanvasTile {
                 // ctx.restore();
             }
         }
+    }
+
+    drawColumnBorder(colIndex) {
+        const color = '#107C41';
+
+        if (colIndex < this.startGlobalCol || colIndex >= this.endGlobalCol) return;
+        const ctx = this.ctx;
+        ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transforms before re-scaling
+        const dpr = window.devicePixelRatio;
+        ctx.scale(dpr, dpr);
+        let currentX = 0;
+        for (let c = this.startGlobalCol; c < colIndex; c++) {
+            currentX += this.grid.getColumnWidth(c);
+        }
+        const colWidth = this.grid.getColumnWidth(colIndex);
+        ctx.save();
+        // ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        // Left border
+        ctx.beginPath();
+        console.log(currentX, this.height);
+        ctx.moveTo(currentX - 0.5, 0);
+        ctx.lineTo(currentX - 0.5, this.height);
+        ctx.stroke();
+        // Right border
+        ctx.beginPath();
+        ctx.moveTo(currentX + colWidth - 0.5, 0);
+        ctx.lineTo(currentX + colWidth - 0.5, this.height);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Draw a green border on the top and bottom of the specified row (full width of the tile)
+    drawRowBorder(rowIndex) {
+        const color = '#107C41';
+        if (rowIndex < this.startGlobalRow || rowIndex >= this.endGlobalRow) return;
+        const ctx = this.ctx;
+
+        let currentY = 0;
+        for (let r = this.startGlobalRow; r < rowIndex; r++) {
+            currentY += this.grid.getRowHeight(r);
+        }
+        const rowHeight = this.grid.getRowHeight(rowIndex);
+        ctx.save();
+        // ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1;
+        // Top border
+        ctx.beginPath();
+        ctx.moveTo(0, currentY - 0.5);
+        ctx.lineTo(this.width, currentY - 0.5);
+        ctx.stroke();
+        // Bottom border
+        ctx.beginPath();
+        ctx.moveTo(0, currentY + rowHeight - 0.5);
+        ctx.lineTo(this.width, currentY + rowHeight - 0.5);
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    // Clear the highlight by redrawing the tile
+    clearResizeHighlight() {
+        this.draw();
     }
 
 }

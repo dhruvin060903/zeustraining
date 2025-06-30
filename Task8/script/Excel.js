@@ -121,6 +121,8 @@ class Grid {
                 this.selectionManager.clearSelection();
             }
         }
+        this.drawHeaders();
+
     }
     handleMouseMoveForSelection(e) {
         if (this.isSelecting && this.selectionStart && e.target.classList.contains('grid-canvas-tile')) {
@@ -143,6 +145,8 @@ class Grid {
                 this.selectionManager.setSelection(rangeSelection);
             }
         }
+        this.drawHeaders();
+
     }
 
     handleMouseUpForSelection(e) {
@@ -150,6 +154,8 @@ class Grid {
         // this.selectionStart = null;
         this.selectionManager.renderSelection();
         this.finishCellEdit();
+        this.updateStatusBar();
+
     }
 
     handleMouseDown(e) {
@@ -205,7 +211,7 @@ class Grid {
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-
+            console.log(e.clientX, e.clientY, rect.left, rect.top, x, y);
             const tileRow = parseInt(e.target.dataset.tileRow);
             const tileCol = parseInt(e.target.dataset.tileCol);
 
@@ -253,7 +259,8 @@ class Grid {
         this.selectionManager.setSelection(cellSelection);
 
         // Keep the selected cell reference for editing
-        this.selectedCell = { row, col };
+   
+        this.updateStatusBar();
         // this.redrawCellInTiles(row, col);
 
     }
@@ -279,6 +286,8 @@ class Grid {
         const columnSelection = new ColumnSelection(col);
         this.selectionManager.setSelection(columnSelection);
         this.selectedCell = null;
+        this.drawHeaders();
+        this.updateStatusBar();
     }
 
     selectRow(row) {
@@ -289,6 +298,8 @@ class Grid {
         const rowSelection = new RowSelection(row);
         this.selectionManager.setSelection(rowSelection);
         this.selectedCell = null;
+        this.drawHeaders();
+        this.updateStatusBar();
     }
 
     startCellEdit(row, col) {
@@ -299,7 +310,7 @@ class Grid {
             this.selectionManager.activeSelection.type !== 'cell') {
             return;
         }
-        this.selectCell(row, col);
+        // this.selectCell(row, col);
         this.isEditing = true;
 
         // Create input element
@@ -567,6 +578,7 @@ class Grid {
         }
 
         document.body.style.cursor = this.resizeType === 'column' ? 'col-resize' : 'row-resize';
+        this.highlightResizeLine();
     }
 
     handleMouseMove(e) {
@@ -579,6 +591,7 @@ class Grid {
         } else if (this.resizeType === 'row' && this.resizeStartPos - this.resizeStartSize < e.clientY) {
             resizerLine.style.top = `${e.clientY}px`;
         }
+        this.highlightResizeLine();
     }
 
     handleMouseUp(e) {
@@ -603,6 +616,28 @@ class Grid {
         this.isResizing = false;
         this.resizeType = null;
         this.resizeIndex = -1;
+        this.highlightResizeLine(true); // clear highlight
+    }
+
+
+    // Highlight only the border of the resizing row or column
+    highlightResizeLine(clear = false) {
+        if (!this.isResizing || clear) {
+            // Clear highlight on all tiles
+            for (const tile of this.canvasTiles.values()) {
+                tile.clearResizeHighlight && tile.clearResizeHighlight();
+            }
+            return;
+        }
+        if (this.resizeType === 'column') {
+            for (const tile of this.canvasTiles.values()) {
+                tile.drawColumnBorder && tile.drawColumnBorder(this.resizeIndex, '#107C41');
+            }
+        } else if (this.resizeType === 'row') {
+            for (const tile of this.canvasTiles.values()) {
+                tile.drawRowBorder && tile.drawRowBorder(this.resizeIndex, '#107C41');
+            }
+        }
     }
 
     redrawGrid() {
@@ -656,20 +691,55 @@ class Grid {
         const scrollTop = this.container.scrollTop;
         const scrollLeft = this.container.scrollLeft;
 
+        // Get selection info
+        let selectedRows = new Set();
+        let selectedCols = new Set();
+        let selection = this.selectionManager.activeSelection;
+        let highlightColHeaders = false;
+        let highlightRowHeaders = false;
+        let colHeaderBg = '#CAEAD8', colHeaderText = '#0F7045';
+        let rowHeaderBg = '#CAEAD8', rowHeaderText = '#0F7045';
+
+        if (selection) {
+            if (selection.type === 'cell' || selection.type === 'range') {
+                highlightColHeaders = true;
+                highlightRowHeaders = true;
+                if (selection.type === 'cell') {
+                    selectedRows.add(selection.row);
+                    selectedCols.add(selection.col);
+                } else if (selection.type === 'range') {
+                    for (let r = selection.startRow; r <= selection.endRow; r++) selectedRows.add(r);
+                    for (let c = selection.startCol; c <= selection.endCol; c++) selectedCols.add(c);
+                }
+            } else if (selection.type === 'column') {
+                highlightColHeaders = true;
+                highlightRowHeaders = true; // Highlight all row headers
+                selectedCols.add(selection.col);
+                // Add all rows to selectedRows
+                for (let r = 0; r < TOTAL_ROWS; r++) selectedRows.add(r);
+                colHeaderBg = '#107C41'; // Use column selection color for column header
+                colHeaderText = '#fff';
+            } else if (selection.type === 'row') {
+                highlightRowHeaders = true;
+                highlightColHeaders = true; // Highlight all column headers
+                selectedRows.add(selection.row);
+                // Add all columns to selectedCols
+                for (let c = 0; c < TOTAL_COLUMNS; c++) selectedCols.add(c);
+                rowHeaderBg = '#107C41'; // Use row selection color for row header
+                rowHeaderText = '#fff';
+            }
+        }
+
         // Draw column headers
         const colCtx = this.colHeaderCtx;
         colCtx.clearRect(0, 0, this.colHeaderCanvas.width, this.colHeaderCanvas.height);
         colCtx.font = '12px Arial';
         colCtx.textAlign = 'center';
         colCtx.textBaseline = 'middle';
-        colCtx.fillStyle = '#4b5563';
         colCtx.lineWidth = 1;
-        colCtx.strokeStyle = '#d1d5db';
 
         let currentX = -scrollLeft;
         let startCol = 0;
-
-        // Find starting column
         while (currentX < 0 && startCol < TOTAL_COLUMNS) {
             currentX += this.getColumnWidth(startCol);
             startCol++;
@@ -679,17 +749,29 @@ class Grid {
             currentX -= this.getColumnWidth(startCol);
         }
 
-        // Draw visible columns
         for (let c = startCol; c < TOTAL_COLUMNS && currentX < this.colHeaderCanvas.clientWidth; c++) {
             const colWidth = this.getColumnWidth(c);
-
-            colCtx.fillStyle = '#f8f8f8';
-            colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
+            // Highlight if selected and allowed
+            if (highlightColHeaders && selectedCols.has(c)) {
+                colCtx.fillStyle = colHeaderBg;
+                colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
+                colCtx.strokeStyle = '#0F7045';
+                colCtx.lineWidth = 2;
+                // Bottom border
+                colCtx.beginPath();
+                colCtx.moveTo(currentX, HEADER_HEIGHT - 1);
+                colCtx.lineTo(currentX + colWidth, HEADER_HEIGHT - 1);
+                colCtx.stroke();
+                colCtx.lineWidth = 1;
+            } else {
+                colCtx.fillStyle = '#f8f8f8';
+                colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
+            }
+            colCtx.strokeStyle = '#d1d5db';
             colCtx.strokeRect(currentX - 0.5, 0, colWidth, HEADER_HEIGHT);
-            colCtx.fillStyle = '#4b5563';
+            colCtx.fillStyle = (highlightColHeaders && selectedCols.has(c)) ? colHeaderText : '#4b5563';
             if (colWidth > 10)
                 colCtx.fillText(getColumnName(c), currentX + colWidth / 2, HEADER_HEIGHT / 2);
-
             currentX += colWidth;
         }
 
@@ -697,16 +779,12 @@ class Grid {
         const rowCtx = this.rowHeaderCtx;
         rowCtx.clearRect(0, 0, this.rowHeaderCanvas.width, this.rowHeaderCanvas.height);
         rowCtx.font = '12px Arial';
-        rowCtx.textAlign = 'center';
+        rowCtx.textAlign = 'left';
         rowCtx.textBaseline = 'middle';
-        rowCtx.fillStyle = '#4b5563';
         rowCtx.lineWidth = 1;
-        rowCtx.strokeStyle = '#d1d5db';
 
         let currentY = -scrollTop;
         let startRow = 0;
-
-        // Find starting row
         while (currentY < 0 && startRow < TOTAL_ROWS) {
             currentY += this.getRowHeight(startRow);
             startRow++;
@@ -716,17 +794,32 @@ class Grid {
             currentY -= this.getRowHeight(startRow);
         }
 
-        // Draw visible rows
         for (let r = startRow; r < TOTAL_ROWS && currentY < this.rowHeaderCanvas.clientHeight; r++) {
             const rowHeight = this.getRowHeight(r);
-
-            rowCtx.fillStyle = '#f8f8f8';
-            rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
+            // Highlight if selected and allowed
+            if (highlightRowHeaders && selectedRows.has(r)) {
+                rowCtx.fillStyle = rowHeaderBg;
+                rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
+                rowCtx.strokeStyle = '#0F7045';
+                rowCtx.lineWidth = 2;
+                // Right border
+                rowCtx.beginPath();
+                rowCtx.moveTo(HEADER_WIDTH - 1, currentY);
+                rowCtx.lineTo(HEADER_WIDTH - 1, currentY + rowHeight);
+                rowCtx.stroke();
+                rowCtx.lineWidth = 1;
+            } else {
+                rowCtx.fillStyle = '#f8f8f8';
+                rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
+            }
+            rowCtx.strokeStyle = '#d1d5db';
             rowCtx.strokeRect(0, currentY - 0.5, HEADER_WIDTH, rowHeight);
-            rowCtx.fillStyle = '#4b5563';
-            if (rowHeight > 10)
-                rowCtx.fillText(`${r + 1}`, HEADER_WIDTH / 2, currentY + rowHeight / 2);
-
+            rowCtx.fillStyle = (highlightRowHeaders && selectedRows.has(r)) ? rowHeaderText : '#4b5563';
+            if (rowHeight > 10) {
+                const text = `${r + 1}`;
+                const textWidth = rowCtx.measureText(text).width;
+                rowCtx.fillText(text, HEADER_WIDTH - textWidth - 5, currentY + rowHeight / 2);
+            }
             currentY += rowHeight;
         }
 
@@ -796,8 +889,78 @@ class Grid {
 
         // this.updateContentSizer();f
     }
+    loadSampleData() {
+        let numRows = 50000;
+        let cols = ["id", "name", "age", "salary"];
+
+        for (let i = 0; i < cols.length; i++) {
+            this.cells.set("0_" + i, new Cell(0, i, cols[i]));
+        }
+
+        // add some data
+        for (let row = 1; row < numRows; row++) {
+            let person = {
+                id: row,
+                name: "User" + row,
+                age: 20 + (row % 30),
+                salary: 50000 + row * 100
+            };
+
+            for (let col = 0; col < cols.length; col++) {
+                let value = person[cols[col]];
+                this.cells.set(row + "_" + col, new Cell(row, col, value.toString()));
+            }
+        }
+
+        this.renderVisibleTiles();
+    }
+
+
+    updateStatusBar() {
+        const statusBar = document.getElementById('status-bar');
+        if (!statusBar) return;
+        let values = [];
+        const sel = this.selectionManager.activeSelection;
+        if (!sel) {
+            statusBar.textContent = '';
+            return;
+        }
+        if (sel.type === 'cell') {
+            const cell = this.getCell(sel.row, sel.col);
+            if (!isNaN(cell.value) && cell.value !== '') values = [Number(cell.value)];
+        } else if (sel.type === 'range') {
+            for (let r = sel.startRow; r <= sel.endRow; r++) {
+                for (let c = sel.startCol; c <= sel.endCol; c++) {
+                    const cell = this.getCell(r, c);
+                    if (!isNaN(cell.value) && cell.value !== '') values.push(Number(cell.value));
+                }
+            }
+        } else if (sel.type === 'row') {
+            for (let c = 0; c < this.columns.length; c++) {
+                const cell = this.getCell(sel.row, c);
+                if (!isNaN(cell.value) && cell.value !== '') values.push(Number(cell.value));
+            }
+        } else if (sel.type === 'column') {
+            for (let r = 0; r < this.rows.length; r++) {
+                const cell = this.getCell(r, sel.col);
+                if (!isNaN(cell.value) && cell.value !== '') values.push(Number(cell.value));
+            }
+        }
+        if (values.length === 0) {
+            statusBar.textContent = '';
+            return;
+        }
+        const count = values.length;
+        const sum = values.reduce((a, b) => a + b, 0);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const avg = sum / count;
+        statusBar.textContent = `Count: ${count}    Sum: ${sum}    Min: ${min}    Max: ${max}    Avg: ${avg.toFixed(2)}`;
+    }
+
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const grid = new Grid('grid-container');
+    grid.loadSampleData(); // Load sample data after grid initialization
 });

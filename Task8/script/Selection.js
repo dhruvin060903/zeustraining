@@ -8,7 +8,6 @@ export class SelectionManager {
     }
     handleKeydown(e) {
         if (this.grid.isEditing) {
-            // If editing, let the Grid's cellInput handle key events (Enter, Escape)
             return;
         }
 
@@ -75,13 +74,13 @@ export class SelectionManager {
         if (selection.type === 'range' &&
             selection.startRow === selection.endRow &&
             selection.startCol === selection.endCol) {
-            console.log('Converting single-cell RangeSelection to CellSelection');
             selection = new CellSelection(selection.startRow, selection.startCol);
             this.activeSelection = selection; // Update activeSelection
         }
 
         selection.render(this.selectionOverlay);
         this.selectionOverlay.style.display = 'block';
+
     }
     handleScroll() {
         if (this.activeSelection) {
@@ -148,10 +147,10 @@ export class ColumnSelection {
 
         overlay.style.left = `${left}px`;
         overlay.style.top = '0px';
-        overlay.style.width = `${width}px`;
+        overlay.style.width = `${width - 2}px`;
         overlay.style.height = `${totalHeight}px`;
-        overlay.style.border = '2px solid #2563eb';
-        overlay.style.backgroundColor = 'rgba(37, 99, 235, 0.1)';
+        overlay.style.border = '2px solid #137E43';
+        overlay.style.backgroundColor = 'rgba(232, 242, 236, 0.3)';
     }
 
     contains(row, col) {
@@ -182,9 +181,10 @@ export class RowSelection {
         overlay.style.left = '0px';
         overlay.style.top = `${top}px`;
         overlay.style.width = `${totalWidth}px`;
-        overlay.style.height = `${height}px`;
-        overlay.style.border = '2px solid #dc2626';
-        overlay.style.backgroundColor = 'rgba(220, 38, 38, 0.1)';
+        overlay.style.height = `${height - 2}px`;
+        overlay.style.border = '2px solid #137E43';
+        overlay.style.backgroundColor = 'rgba(232, 242, 236, 0.3)';
+
     }
 
     contains(row, col) {
