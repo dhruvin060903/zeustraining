@@ -1,9 +1,7 @@
-
 export class SelectionManager {
     constructor(grid) {
         this.grid = grid;
         this.activeSelection = null;
-        this.selectionOverlay = this.createSelectionOverlay();
         document.addEventListener('keydown', this.handleKeydown.bind(this));
     }
     handleKeydown(e) {
@@ -40,52 +38,19 @@ export class SelectionManager {
         }
 
     }
-    createSelectionOverlay() {
-        const overlay = document.createElement('div');
-        overlay.className = 'selection-overlay';
-        overlay.style.position = 'absolute';
-        overlay.style.pointerEvents = 'none';
-        overlay.style.zIndex = '10';
-        overlay.style.display = 'none';
-        this.grid.container.appendChild(overlay);
-        return overlay;
-    }
-
     setSelection(selection) {
         this.activeSelection = selection;
-        this.renderSelection();
+        this.grid.redrawSelection(); // Redraw selection on canvas
     }
-
     clearSelection() {
         this.activeSelection = null;
-        this.selectionOverlay.style.display = 'none';
+        this.grid.redrawSelection();
     }
-
     renderSelection() {
-        console.log('Rendering selection:', this.activeSelection); // Debug log
-        if (!this.activeSelection) {
-            this.selectionOverlay.style.display = 'none';
-            console.log('No active selection, hiding overlay');
-            return;
-        }
-
-        let selection = this.activeSelection;
-        // Check if RangeSelection spans only one cell
-        if (selection.type === 'range' &&
-            selection.startRow === selection.endRow &&
-            selection.startCol === selection.endCol) {
-            selection = new CellSelection(selection.startRow, selection.startCol);
-            this.activeSelection = selection; // Update activeSelection
-        }
-
-        selection.render(this.selectionOverlay);
-        this.selectionOverlay.style.display = 'block';
-
+        this.grid.redrawSelection();
     }
     handleScroll() {
-        if (this.activeSelection) {
-            this.renderSelection();
-        }
+        this.grid.redrawSelection();
     }
 }
 
@@ -94,30 +59,6 @@ export class CellSelection {
         this.type = 'cell';
         this.row = row;
         this.col = col;
-    }
-
-    render(overlay) {
-        const grid = overlay.parentElement.grid || window.grid;
-
-        let left = 0;
-        for (let c = 0; c < this.col; c++) {
-            left += grid.getColumnWidth(c);
-        }
-
-        let top = 0;
-        for (let r = 0; r < this.row; r++) {
-            top += grid.getRowHeight(r);
-        }
-
-        const width = grid.getColumnWidth(this.col);
-        const height = grid.getRowHeight(this.row);
-
-        overlay.style.left = `${left}px`;
-        overlay.style.top = `${top}px`;
-        overlay.style.width = `${width - 2}px`;
-        overlay.style.height = `${height - 2}px`;
-        overlay.style.border = '2px solid #137E43';
-        overlay.style.backgroundColor = 'rgba(0,0,0,0)';
     }
 
     contains(row, col) {
@@ -131,28 +72,6 @@ export class ColumnSelection {
         this.col = col;
     }
 
-    render(overlay) {
-        const grid = overlay.parentElement.grid || window.grid;
-
-        let left = 0;
-        for (let c = 0; c < this.col; c++) {
-            left += grid.getColumnWidth(c);
-        }
-
-        const width = grid.getColumnWidth(this.col);
-        let totalHeight = 0;
-        for (let r = 0; r < grid.rows.length; r++) {
-            totalHeight += grid.getRowHeight(r);
-        }
-
-        overlay.style.left = `${left}px`;
-        overlay.style.top = '0px';
-        overlay.style.width = `${width - 2}px`;
-        overlay.style.height = `${totalHeight}px`;
-        overlay.style.border = '2px solid #137E43';
-        overlay.style.backgroundColor = 'rgba(232, 242, 236, 0.3)';
-    }
-
     contains(row, col) {
         return this.col === col;
     }
@@ -162,29 +81,6 @@ export class RowSelection {
     constructor(row) {
         this.type = 'row';
         this.row = row;
-    }
-
-    render(overlay) {
-        const grid = overlay.parentElement.grid || window.grid;
-
-        let top = 0;
-        for (let r = 0; r < this.row; r++) {
-            top += grid.getRowHeight(r);
-        }
-
-        const height = grid.getRowHeight(this.row);
-        let totalWidth = 0;
-        for (let c = 0; c < grid.columns.length; c++) {
-            totalWidth += grid.getColumnWidth(c);
-        }
-
-        overlay.style.left = '0px';
-        overlay.style.top = `${top}px`;
-        overlay.style.width = `${totalWidth}px`;
-        overlay.style.height = `${height - 2}px`;
-        overlay.style.border = '2px solid #137E43';
-        overlay.style.backgroundColor = 'rgba(232, 242, 236, 0.3)';
-
     }
 
     contains(row, col) {
@@ -199,41 +95,6 @@ export class RangeSelection {
         this.startCol = Math.min(startCol, endCol);
         this.endRow = Math.max(startRow, endRow);
         this.endCol = Math.max(startCol, endCol);
-    }
-
-    render(overlay) {
-        const grid = overlay.parentElement.grid || window.grid;
-
-        let left = 0;
-        for (let c = 0; c < this.startCol; c++) {
-            left += grid.getColumnWidth(c);
-        }
-
-        let top = 0;
-        for (let r = 0; r < this.startRow; r++) {
-            top += grid.getRowHeight(r);
-        }
-
-        let width = 0;
-        for (let c = this.startCol; c <= this.endCol; c++) {
-            width += grid.getColumnWidth(c);
-        }
-
-        let height = 0;
-        for (let r = this.startRow; r <= this.endRow; r++) {
-            height += grid.getRowHeight(r);
-        }
-
-        // Adjust for scroll position
-        // left -= grid.container.scrollLeft;
-        // top -= grid.container.scrollTop;
-
-        overlay.style.left = `${left}px`;
-        overlay.style.top = `${top}px`;
-        overlay.style.width = `${width - 2}px`;
-        overlay.style.height = `${height - 2}px`;
-        overlay.style.border = '2px solid #137E43';
-        overlay.style.backgroundColor = 'rgba(232, 242, 236, 0.3)';
     }
 
     contains(row, col) {

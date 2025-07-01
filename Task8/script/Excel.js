@@ -58,8 +58,8 @@ class Grid {
         this.rowHeaderCanvas = document.getElementById('row-header-canvas');
         this.rowHeaderCtx = this.rowHeaderCanvas.getContext('2d');
         this.selectionManager = new SelectionManager(this);
-        this.selectionManager.grid = this; // Make grid accessible
-        window.grid = this; // Make grid globally accessible for selections
+        this.selectionManager.grid = this;
+        window.grid = this;
 
         this.isSelecting = false;
         this.selectionStart = null;
@@ -109,7 +109,7 @@ class Grid {
                     this.selectionManager.activeSelection.contains(cellCoords.row, cellCoords.col)) {
                     // Clicked within the existing range selection, do nothing to preserve it
                     // console.log("erer")
-                    console.log("single clcik")
+                    console.log("single click")
                     return;
                 }
 
@@ -144,9 +144,9 @@ class Grid {
                 );
                 this.selectionManager.setSelection(rangeSelection);
             }
+            this.drawHeaders();
         }
-        this.drawHeaders();
-
+        // console.log("handleMouseMoveForSelection")
     }
 
     handleMouseUpForSelection(e) {
@@ -250,19 +250,9 @@ class Grid {
         }
         const previousSelection = this.selectedCell;
         this.selectedCell = { row, col };
-
-        // Redraw affected tiles
-        if (previousSelection) {
-            this.redrawCellInTiles(previousSelection.row, previousSelection.col);
-        }
         const cellSelection = new CellSelection(row, col);
         this.selectionManager.setSelection(cellSelection);
-
-        // Keep the selected cell reference for editing
-   
         this.updateStatusBar();
-        // this.redrawCellInTiles(row, col);
-
     }
     // selectCell(row, col) {
     //     if (this.isEditing) {
@@ -335,11 +325,12 @@ class Grid {
                 e.preventDefault();
             }
         });
-        this.selectionManager.selectionOverlay.style.display = 'none';
-
         this.container.appendChild(this.cellInput);
         this.cellInput.focus();
         this.cellInput.select();
+
+        // Redraw selection to hide highlight while editing
+        this.redrawSelection();
     }
 
     positionCellInput(row, col) {
@@ -369,7 +360,7 @@ class Grid {
     }
 
     finishCellEdit() {
-        // console.log("sdfds")
+        // console.log("finsihcell")
         if (!this.isEditing || !this.cellInput) return;
         const newValue = this.cellInput.value;
         const cell = this.getCell(this.selectedCell.row, this.selectedCell.col);
@@ -387,7 +378,6 @@ class Grid {
         this.cellInput = null;
         this.isEditing = false;
         this.selectionManager.renderSelection();
-
     }
 
     cancelCellEdit() {
@@ -396,6 +386,7 @@ class Grid {
         this.container.removeChild(this.cellInput);
         this.cellInput = null;
         this.isEditing = false;
+        this.selectionManager.renderSelection();
     }
 
     redrawCellInTiles(row, col) {
@@ -409,6 +400,12 @@ class Grid {
         }
     }
 
+    redrawSelection() {
+        // Redraw all visible tiles to update selection visuals
+        for (const tile of this.canvasTiles.values()) {
+            tile.draw();
+        }
+    }
 
     getColumnWidth(index) {
         return this.columns[index]?.width || DEFAULT_COLUMN_WIDTH;
@@ -450,6 +447,7 @@ class Grid {
     }
 
     createResizeHandles() {
+        // console.log("createResizeHandles")
         this.resizeHandles.forEach(handle => handle.remove());
         this.resizeHandles = [];
 
@@ -645,7 +643,7 @@ class Grid {
             tile.draw();
         }
         this.drawHeaders();
-        this.createResizeHandles();
+        // this.createResizeHandles();
         this.selectionManager.renderSelection();
         // this.updateContentSizer();
     }
@@ -688,9 +686,10 @@ class Grid {
     }
 
     drawHeaders() {
+        // console.log("drawHeaders")
         const scrollTop = this.container.scrollTop;
         const scrollLeft = this.container.scrollLeft;
-
+        const dpr = window.devicePixelRatio;
         // Get selection info
         let selectedRows = new Set();
         let selectedCols = new Set();
@@ -736,7 +735,7 @@ class Grid {
         colCtx.font = '12px Arial';
         colCtx.textAlign = 'center';
         colCtx.textBaseline = 'middle';
-        colCtx.lineWidth = 1;
+        colCtx.lineWidth = 1 / dpr;
 
         let currentX = -scrollLeft;
         let startCol = 0;
@@ -781,7 +780,7 @@ class Grid {
         rowCtx.font = '12px Arial';
         rowCtx.textAlign = 'left';
         rowCtx.textBaseline = 'middle';
-        rowCtx.lineWidth = 1;
+        rowCtx.lineWidth = 1 / dpr;
 
         let currentY = -scrollTop;
         let startRow = 0;
@@ -801,13 +800,13 @@ class Grid {
                 rowCtx.fillStyle = rowHeaderBg;
                 rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
                 rowCtx.strokeStyle = '#0F7045';
-                rowCtx.lineWidth = 2;
+                rowCtx.lineWidth = 2 / dpr;
                 // Right border
                 rowCtx.beginPath();
                 rowCtx.moveTo(HEADER_WIDTH - 1, currentY);
                 rowCtx.lineTo(HEADER_WIDTH - 1, currentY + rowHeight);
                 rowCtx.stroke();
-                rowCtx.lineWidth = 1;
+                rowCtx.lineWidth = 1 / dpr;
             } else {
                 rowCtx.fillStyle = '#f8f8f8';
                 rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
@@ -839,6 +838,7 @@ class Grid {
     }
 
     renderVisibleTiles() {
+        // console.log("renderVisibleTiles")
         this.drawHeaders();
         const scrollTop = this.container.scrollTop;
         const scrollLeft = this.container.scrollLeft;
