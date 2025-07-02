@@ -184,7 +184,7 @@ export class CanvasTile {
         ctx.save();
         ctx.strokeStyle = color;
         ctx.lineWidth = width;
-        ctx.strokeRect(x + 1, y + 1, colWidth - 2, rowHeight - 2);
+        ctx.strokeRect(x-1, y-1, colWidth , rowHeight);
         ctx.restore();
     }
 
@@ -213,8 +213,8 @@ export class CanvasTile {
         // Top border: only if this tile contains the top edge
         if (this.startGlobalRow <= startRow && startRow < this.endGlobalRow) {
             ctx.beginPath();
-            ctx.moveTo(xLeft + 1, yTop + 1);
-            ctx.lineTo(xLeft + widthPx - 1, yTop + 1);
+            ctx.moveTo(xLeft-1, yTop - 1);
+            ctx.lineTo(xLeft + widthPx + 1, yTop - 1);
             ctx.stroke();
         }
         // Bottom border: only if this tile contains the bottom edge
@@ -223,15 +223,15 @@ export class CanvasTile {
             for (let r = minRow; r < endRow; r++) yBottom += this.grid.getRowHeight(r);
             yBottom += this.grid.getRowHeight(endRow);
             ctx.beginPath();
-            ctx.moveTo(xLeft + 1, yBottom - 1);
-            ctx.lineTo(xLeft + widthPx - 1, yBottom - 1);
+            ctx.moveTo(xLeft - 1, yBottom);
+            ctx.lineTo(xLeft + widthPx + 1, yBottom );
             ctx.stroke();
         }
         // Left border: only if this tile contains the left edge
         if (this.startGlobalCol <= startCol && startCol < this.endGlobalCol) {
             ctx.beginPath();
-            ctx.moveTo(xLeft + 1, yTop + 1);
-            ctx.lineTo(xLeft + 1, yTop + height - 1);
+            ctx.moveTo(xLeft - 1, yTop - 2);
+            ctx.lineTo(xLeft - 1, yTop + height+1);
             ctx.stroke();
         }
         // Right border: only if this tile contains the right edge
@@ -240,8 +240,8 @@ export class CanvasTile {
             for (let c = minCol; c < endCol; c++) xRight += this.grid.getColumnWidth(c);
             xRight += this.grid.getColumnWidth(endCol);
             ctx.beginPath();
-            ctx.moveTo(xRight - 1, yTop + 1);
-            ctx.lineTo(xRight - 1, yTop + height - 1);
+            ctx.moveTo(xRight , yTop -2);
+            ctx.lineTo(xRight , yTop + height + 1);
             ctx.stroke();
         }
         ctx.restore();

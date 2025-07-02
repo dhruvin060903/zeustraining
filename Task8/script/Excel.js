@@ -129,7 +129,7 @@ class Grid {
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-
+            console.log(e.clientX, e.clientY, rect.left, rect.top, x, y);
             const tileRow = parseInt(e.target.dataset.tileRow);
             const tileCol = parseInt(e.target.dataset.tileCol);
 
@@ -831,7 +831,8 @@ class Grid {
         this.selectionManager.renderSelection();
     }
 
-    HandleScroll() {
+    HandleScroll(e) {
+        // console.log("HandleScroll",e.target.scrollTop, e.target.scrollLeft);
         this.renderVisibleTiles();
         this.selectionManager.handleScroll();
 
