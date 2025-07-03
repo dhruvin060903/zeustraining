@@ -85,9 +85,9 @@ class Grid {
         this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
         this.container.addEventListener('click', this.handleClick.bind(this));
         // this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
-        this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
-        this.container.addEventListener('mousemove', this.handleMouseMoveForSelection.bind(this));
-        this.container.addEventListener('mouseup', this.handleMouseUpForSelection.bind(this));
+        window.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        window.addEventListener('mousemove', this.handleMouseMoveForSelection.bind(this));
+        window.addEventListener('mouseup', this.handleMouseUpForSelection.bind(this));
 
         // Add header click listeners
         this.colHeaderCanvas.addEventListener('click', this.handleColumnHeaderClick.bind(this));
@@ -125,26 +125,53 @@ class Grid {
 
     }
     handleMouseMoveForSelection(e) {
-        if (this.isSelecting && this.selectionStart && e.target.classList.contains('grid-canvas-tile')) {
+        if (this.isSelecting && this.selectionStart) {
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
-            console.log(e.clientX, e.clientY, rect.left, rect.top, x, y);
+            console.log(e.clientX, e.clientY, rect.left, rect.top, x, y, e.target.dataset.tileRow, e.target.dataset.tileCol);
             const tileRow = parseInt(e.target.dataset.tileRow);
             const tileCol = parseInt(e.target.dataset.tileCol);
 
             const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
             if (cellCoords) {
-                // Create range selection
+                console.log("cellCoords", cellCoords);
+                // Create range selection with active cell for correct scrolling
                 const rangeSelection = new RangeSelection(
                     this.selectionStart.row,
                     this.selectionStart.col,
                     cellCoords.row,
-                    cellCoords.col
+                    cellCoords.col,
+                    cellCoords.row, // activeRow
+                    cellCoords.col  // activeCol
+                );
+                this.selectionManager.setSelection(rangeSelection);
+            }
+            else {
+                // If mouse is outside the grid, clamp to edges
+                let row = Math.max(0, Math.min(TOTAL_ROWS - 1, Math.floor(y / this.getRowHeight(0))));
+                let col = Math.max(0, Math.min(TOTAL_COLUMNS - 1, Math.floor(x / this.getColumnWidth(0))));
+
+                // If mouse is left/right of grid, clamp col
+                if (x < 0) col = 0;
+                else if (x > this.container.clientWidth) col = TOTAL_COLUMNS - 1;
+
+                // If mouse is above/below grid, clamp row
+                if (y < 0) row = 0;
+                else if (y > this.container.clientHeight) row = TOTAL_ROWS - 1;
+
+                const rangeSelection = new RangeSelection(
+                    this.selectionStart.row,
+                    this.selectionStart.col,
+                    row,
+                    col,
+                    row, // activeRow
+                    col  // activeCol
                 );
                 this.selectionManager.setSelection(rangeSelection);
             }
             this.drawHeaders();
+            // this.selectionManager.scrollSelectionIntoView();
         }
         // console.log("handleMouseMoveForSelection")
     }
@@ -171,7 +198,7 @@ class Grid {
             if (cellCoords) {
                 this.isSelecting = true;
                 this.selectionStart = cellCoords;
-                e.preventDefault();
+                // e.preventDefault();
             }
         }
     }
@@ -644,7 +671,7 @@ class Grid {
         }
         this.drawHeaders();
         // this.createResizeHandles();
-        this.selectionManager.renderSelection();
+        // this.selectionManager.renderSelection();
         // this.updateContentSizer();
     }
 
@@ -832,6 +859,7 @@ class Grid {
     }
 
     HandleScroll(e) {
+        console.log("HandleScroll", e);
         // console.log("HandleScroll",e.target.scrollTop, e.target.scrollLeft);
         this.renderVisibleTiles();
         this.selectionManager.handleScroll();

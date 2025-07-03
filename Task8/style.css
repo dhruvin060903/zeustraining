@@ -1,5 +1,5 @@
 body {
-  font-family: 'Times New Roman', Times, serif, sans-serif;
+  font-family: "Times New Roman", Times, serif, sans-serif;
   margin: 0;
   padding: 0;
   display: flex;
@@ -168,25 +168,25 @@ body {
   cursor: cell;
 }
 .canvas-selection-border {
-    border: 2px solid #137E43;
-    position: absolute;
-    pointer-events: none;
-    z-index: 10;
-    box-sizing: border-box;
+  border: 2px solid #137e43;
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  box-sizing: border-box;
 }
-  
-.status-bar{
-    position: absolute;
-        left: 50px;
-        right: 0;
-        bottom: 0;
-        height: 28px;
-        line-height: 28px;
-        padding-left: 12px;
-        background: #f8f8f8;
-        border-top: 1px solid #d1d5db;
-        font-size: 13px;
-        color: #222;
-        z-index: 30;
-        user-select: none;
+
+.status-bar {
+  position: absolute;
+  left: 50px;
+  right: 0;
+  bottom: 0;
+  height: 28px;
+  line-height: 28px;
+  padding-left: 12px;
+  background: #f8f8f8;
+  border-top: 1px solid #d1d5db;
+  font-size: 13px;
+  color: #222;
+  z-index: 30;
+  user-select: none;
 }
