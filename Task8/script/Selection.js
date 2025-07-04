@@ -118,7 +118,7 @@ export class SelectionManager {
             col = this.activeSelection.col;
         } else if (this.activeSelection.type === 'range') {
             // Use active cell if present, else fallback to startRow/startCol
-            console.log("activeSelection", this.activeSelection);
+            // console.log("activeSelection", this.activeSelection);
             row = (typeof this.activeSelection.activeRow === 'number') ? this.activeSelection.activeRow : this.activeSelection.startRow;
             col = (typeof this.activeSelection.activeCol === 'number') ? this.activeSelection.activeCol : this.activeSelection.startCol;
         } else if (this.activeSelection.type === 'row') {
@@ -140,17 +140,17 @@ export class SelectionManager {
         const visibleBottom = visibleTop + container.clientHeight;
         // Scroll horizontally if needed
         if (left < visibleLeft) {
-            console.log("left", left, "visibleLeft", visibleLeft);
-            container.scrollLeft = left - 25;
+            // console.log("left", left, "visibleLeft", visibleLeft);
+            container.scrollLeft = left;
         } else if (left + colWidth > visibleRight) {
-            console.log("colWidth", colWidth, "container.clientWidth", container.clientWidth);
-            container.scrollLeft = left + colWidth - container.clientWidth + 25;
+            // console.log("colWidth", colWidth, "container.clientWidth", container.clientWidth);
+            container.scrollLeft = left + colWidth - container.clientWidth;
         }
         // Scroll vertically if needed
         if (top < visibleTop) {
-            container.scrollTop = top - 25;
+            container.scrollTop = top ;
         } else if (top + rowHeight > visibleBottom) {
-            container.scrollTop = top + rowHeight - container.clientHeight + 25;
+            container.scrollTop = top + rowHeight - container.clientHeight;
         }
     }
     clearSelection() {
