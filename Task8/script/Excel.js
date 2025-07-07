@@ -373,6 +373,7 @@ class Grid {
     }
 
     selectCell(row, col) {
+        console.log("selectCell", row, col);
         if (this.isEditing) {
             this.finishCellEdit();
         }
@@ -445,8 +446,9 @@ class Grid {
         // Add event listeners
         // this.cellInput.addEventListener('blur', this.finishCellEdit.bind(this));
         this.cellInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' || e.key === 'Tab') {
                 this.finishCellEdit();
+                // this.selectionManager.handleArrowDown();
                 e.preventDefault();
             } else if (e.key === 'Escape') {
                 this.cancelCellEdit();
@@ -482,7 +484,7 @@ class Grid {
         this.cellInput.style.height = `${rowHeight - 1}px`;
         this.cellInput.style.border = '2px solid #137E43';
         this.cellInput.style.outline = 'none';
-        this.cellInput.style.fontSize = '12px';
+        this.cellInput.style.fontSize = '16px';
         this.cellInput.style.padding = '2px';
         this.cellInput.style.zIndex = '1000';
     }
@@ -903,7 +905,7 @@ class Grid {
                 colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
             }
             colCtx.strokeStyle = '#d1d5db';
-            colCtx.strokeRect(currentX - 0.5, 0, colWidth, HEADER_HEIGHT);
+            colCtx.strokeRect(currentX - 0.5, 0, colWidth , HEADER_HEIGHT);
             colCtx.fillStyle = (highlightColHeaders && selectedCols.has(c)) ? colHeaderText : '#4b5563';
             if (colWidth > 10)
                 colCtx.fillText(getColumnName(c), currentX + colWidth / 2, HEADER_HEIGHT / 2);
@@ -968,7 +970,7 @@ class Grid {
     }
 
     HandleScroll(e) {
-        console.log("HandleScroll", e);
+        // console.log("HandleScroll", e);
         // console.log("HandleScroll",e.target.scrollTop, e.target.scrollLeft);
         this.renderVisibleTiles();
         this.selectionManager.handleScroll();
@@ -1123,14 +1125,18 @@ class Grid {
         for (let c = 0; c < TOTAL_COLUMNS; c++) {
             const colWidth = this.getColumnWidth(c);
             if (x >= currentX && x < currentX + colWidth) {
-                // Range selection from start to current
-                const startCol = this.selectionHeaderStart;
-                const endCol = c;
+                // Range selection from anchor to current
+                const anchorCol = this.selectionHeaderStart;
+                const anchorRow = 0;
                 const rangeSelection = new RangeSelection(
-                    0, Math.min(startCol, endCol),
-                    TOTAL_ROWS - 1, Math.max(startCol, endCol),
+                    anchorRow,
+                    anchorCol,
+                    TOTAL_ROWS - 1,
+                    c,
                     0, c // active cell at top of current col
                 );
+                rangeSelection.startAnchorRow = anchorRow;
+                rangeSelection.startAnchorCol = anchorCol;
                 this.selectionManager.setSelection(rangeSelection);
                 this.drawHeaders();
                 break;
@@ -1174,14 +1180,18 @@ class Grid {
         for (let r = 0; r < TOTAL_ROWS; r++) {
             const rowHeight = this.getRowHeight(r);
             if (y >= currentY && y < currentY + rowHeight) {
-                // Range selection from start to current
-                const startRow = this.selectionHeaderStart;
-                const endRow = r;
+                // Range selection from anchor to current
+                const anchorRow = this.selectionHeaderStart;
+                const anchorCol = 0;
                 const rangeSelection = new RangeSelection(
-                    Math.min(startRow, endRow), 0,
-                    Math.max(startRow, endRow), TOTAL_COLUMNS - 1,
+                    anchorRow,
+                    anchorCol,
+                    r,
+                    TOTAL_COLUMNS - 1,
                     r, 0 // active cell at left of current row
                 );
+                rangeSelection.startAnchorRow = anchorRow;
+                rangeSelection.startAnchorCol = anchorCol;
                 this.selectionManager.setSelection(rangeSelection);
                 this.drawHeaders();
                 break;
@@ -1244,6 +1254,9 @@ class Grid {
         if (!fromAutoScroll) this.startAutoScrollSelection(e);
         if (!this.isSelecting || !this.selectionStart) return;
 
+        const anchorRow = this.selectionStart.row;
+        const anchorCol = this.selectionStart.col;
+
         const target = e.target.closest('.grid-canvas-tile');
         if (!target) {
             // Mouse is outside any canvas tile, extrapolate the cell coordinates
@@ -1287,15 +1300,17 @@ class Grid {
                 }
             }
 
-            // Create range selection
+            // Create range selection and pass anchor
             const rangeSelection = new RangeSelection(
-                this.selectionStart.row,
-                this.selectionStart.col,
+                anchorRow,
+                anchorCol,
                 row,
                 col,
                 row, // activeRow
                 col  // activeCol
             );
+            rangeSelection.startAnchorRow = anchorRow;
+            rangeSelection.startAnchorCol = anchorCol;
             this.selectionManager.setSelection(rangeSelection);
             this.selectionManager.scrollSelectionIntoView();
         } else {
@@ -1310,13 +1325,15 @@ class Grid {
             if (cellCoords) {
                 // Create range selection with active cell for correct scrolling
                 const rangeSelection = new RangeSelection(
-                    this.selectionStart.row,
-                    this.selectionStart.col,
+                    anchorRow,
+                    anchorCol,
                     cellCoords.row,
                     cellCoords.col,
                     cellCoords.row, // activeRow
                     cellCoords.col  // activeCol
                 );
+                rangeSelection.startAnchorRow = anchorRow;
+                rangeSelection.startAnchorCol = anchorCol;
                 this.selectionManager.setSelection(rangeSelection);
                 this.selectionManager.scrollSelectionIntoView();
             }

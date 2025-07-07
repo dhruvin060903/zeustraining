@@ -37,9 +37,19 @@ export class SelectionManager {
                 e.preventDefault();
                 this.handleArrowDown();
                 return;
+            case "Enter":
+                e.preventDefault();
+                this.handleArrowDown();
+                return;
+            case "Tab":
+                e.preventDefault();
+                this.handleArrowRight();
+                return;
         }
+
         this.grid.selectedCell = { row: this.activeSelection.row, col: (this.activeSelection.col) };
         // If user pressed a single printable character without modifier keys
+
         if (key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
             let currentRow = 0, currentCol = 0;
 
@@ -68,12 +78,15 @@ export class SelectionManager {
 
             // e.preventDefault(); // Prevent browser default (e.g., scrolling)
         }
+
     }
     handleArrowUp() {
         console.log("ArrowUp pressed");
         if (this.activeSelection) {
             if (this.activeSelection.type === 'cell') {
-                this.setSelection(new CellSelection(Math.max(this.activeSelection.row - 1, 0), this.activeSelection.col));
+                // this.setSelection(new CellSelection(Math.max(this.activeSelection.row - 1, 0), this.activeSelection.col));
+                this.grid.selectCell(Math.max(this.activeSelection.row - 1, 0), this.activeSelection.col);
+                this.grid.drawHeaders();
 
             }
         }
@@ -83,8 +96,10 @@ export class SelectionManager {
         if (this.activeSelection) {
             if (this.activeSelection.type === 'cell') {
                 console.log(this.activeSelection.col);
-                this.setSelection(new CellSelection(this.activeSelection.row, Math.max(this.activeSelection.col - 1, 0)));
+                // this.setSelection(new CellSelection(this.activeSelection.row, Math.max(this.activeSelection.col - 1, 0)));
 
+                this.grid.selectCell(this.activeSelection.row, Math.max(this.activeSelection.col - 1, 0));
+                this.grid.drawHeaders();
 
             }
         }
@@ -93,7 +108,10 @@ export class SelectionManager {
         console.log("ArrowRight pressed");
         if (this.activeSelection) {
             if (this.activeSelection.type === 'cell') {
-                this.setSelection(new CellSelection(this.activeSelection.row, Math.min(this.activeSelection.col + 1), TOTAL_COLUMNS - 1));
+                // this.setSelection(new CellSelection(this.activeSelection.row, Math.min(this.activeSelection.col + 1), TOTAL_COLUMNS - 1));
+                this.grid.selectCell(this.activeSelection.row, Math.min(this.activeSelection.col + 1), TOTAL_COLUMNS - 1);
+                this.grid.drawHeaders();
+
             }
         }
     }
@@ -101,7 +119,11 @@ export class SelectionManager {
         console.log("ArrowDown pressed");
         if (this.activeSelection) {
             if (this.activeSelection.type === 'cell') {
-                this.setSelection(new CellSelection(Math.min(this.activeSelection.row + 1, TOTAL_ROWS), this.activeSelection.col));
+
+                this.grid.selectCell(Math.min(this.activeSelection.row + 1, TOTAL_ROWS), this.activeSelection.col);
+                this.grid.drawHeaders();
+
+                // this.setSelection(new CellSelection(Math.min(this.activeSelection.row + 1, TOTAL_ROWS), this.activeSelection.col));
             }
         }
     }
@@ -148,7 +170,7 @@ export class SelectionManager {
         }
         // Scroll vertically if needed
         if (top < visibleTop) {
-            container.scrollTop = top ;
+            container.scrollTop = top;
         } else if (top + rowHeight > visibleBottom) {
             container.scrollTop = top + rowHeight - container.clientHeight;
         }

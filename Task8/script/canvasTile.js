@@ -114,6 +114,18 @@ export class CanvasTile {
     drawSelectionBackgrounds(ctx) {
         const selection = this.grid.selectionManager.activeSelection;
         if (!selection) return;
+        // Determine anchor cell and its content for range selection
+        let anchorRow = null, anchorCol = null, anchorContent = null;
+        if (selection.type === 'range') {
+            // Always use the cell where the user started the drag (the selectionStart in Grid)
+            // This is always passed as selection.startAnchorRow and selection.startAnchorCol (we will add this if not present)
+            anchorRow = (typeof selection.startAnchorRow === 'number') ? selection.startAnchorRow : this.grid.selectionStart?.row;
+            anchorCol = (typeof selection.startAnchorCol === 'number') ? selection.startAnchorCol : this.grid.selectionStart?.col;
+            // Fallback to startRow/startCol if not available
+            if (typeof anchorRow !== 'number') anchorRow = selection.startRow;
+            if (typeof anchorCol !== 'number') anchorCol = selection.startCol;
+            anchorContent = this.grid.getCell(anchorRow, anchorCol)?.value || '';
+        }
         let currentY = 0;
         for (let r = this.startGlobalRow; r < this.endGlobalRow; r++) {
             const rowHeight = this.grid.getRowHeight(r);
@@ -124,23 +136,24 @@ export class CanvasTile {
                     ctx.save();
                     ctx.beginPath();
                     ctx.rect(currentX, currentY, colWidth, rowHeight);
-                    // Only make the true top-left cell transparent
-                    let isTopLeft = false;
+                    // Only make the anchor cell transparent and show its content
+                    let isAnchor = false;
                     if (selection.type === 'cell') {
-                        isTopLeft = true;
+                        isAnchor = true;
                     } else if (selection.type === 'range') {
-                        isTopLeft = (r === selection.startRow && c === selection.startCol);
+                        isAnchor = (r === anchorRow && c === anchorCol);
                     } else if (selection.type === 'row') {
-                        isTopLeft = (r === selection.row && c === 0);
+                        isAnchor = (r === selection.row && c === 0);
                     } else if (selection.type === 'column') {
-                        isTopLeft = (r === 0 && c === selection.col);
+                        isAnchor = (r === 0 && c === selection.col);
                     }
-                    if (isTopLeft) {
-                        ctx.fillStyle = 'rgba(0,0,0,0)'; // transparent for true top-left cell only
+                    if (isAnchor) {
+                        ctx.fillStyle = 'rgba(0,0,0,0)'; // transparent for anchor cell only
+                        ctx.fill();
                     } else {
                         ctx.fillStyle = 'rgba(19,126,67,0.10)';
+                        ctx.fill();
                     }
-                    ctx.fill();
                     ctx.restore();
                 }
                 currentX += colWidth;
@@ -184,7 +197,7 @@ export class CanvasTile {
         ctx.save();
         ctx.strokeStyle = color;
         ctx.lineWidth = width;
-        ctx.strokeRect(x-1, y-1, colWidth , rowHeight);
+        ctx.strokeRect(x - 1, y - 1, colWidth, rowHeight);
         ctx.restore();
     }
 
@@ -213,7 +226,7 @@ export class CanvasTile {
         // Top border: only if this tile contains the top edge
         if (this.startGlobalRow <= startRow && startRow < this.endGlobalRow) {
             ctx.beginPath();
-            ctx.moveTo(xLeft-1, yTop - 1);
+            ctx.moveTo(xLeft - 1, yTop - 1);
             ctx.lineTo(xLeft + widthPx + 1, yTop - 1);
             ctx.stroke();
         }
@@ -224,14 +237,14 @@ export class CanvasTile {
             yBottom += this.grid.getRowHeight(endRow);
             ctx.beginPath();
             ctx.moveTo(xLeft - 1, yBottom);
-            ctx.lineTo(xLeft + widthPx + 1, yBottom );
+            ctx.lineTo(xLeft + widthPx + 1, yBottom);
             ctx.stroke();
         }
         // Left border: only if this tile contains the left edge
         if (this.startGlobalCol <= startCol && startCol < this.endGlobalCol) {
             ctx.beginPath();
             ctx.moveTo(xLeft - 1, yTop - 2);
-            ctx.lineTo(xLeft - 1, yTop + height+1);
+            ctx.lineTo(xLeft - 1, yTop + height + 1);
             ctx.stroke();
         }
         // Right border: only if this tile contains the right edge
@@ -240,8 +253,8 @@ export class CanvasTile {
             for (let c = minCol; c < endCol; c++) xRight += this.grid.getColumnWidth(c);
             xRight += this.grid.getColumnWidth(endCol);
             ctx.beginPath();
-            ctx.moveTo(xRight , yTop -2);
-            ctx.lineTo(xRight , yTop + height + 1);
+            ctx.moveTo(xRight, yTop - 2);
+            ctx.lineTo(xRight, yTop + height + 1);
             ctx.stroke();
         }
         ctx.restore();
@@ -311,8 +324,7 @@ export class CanvasTile {
 
     // Add this new method to CanvasTile class
     drawCellContent(ctx) {
-        ctx.font = '12px Arial';
-        ctx.textAlign = 'left';
+        ctx.font = '16px Arial';
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#374151';
 
@@ -339,9 +351,23 @@ export class CanvasTile {
                     const content = cell.value; // Use actual value, not getContent()
 
                     if (content && content.trim() !== '') {
-                        // Add some padding from the left edge
-                        const textX = currentX + 4;
-                        const textY = currentY + rowHeight / 2;
+                        // Determine if content is a number (right align) or not (left align)
+                        let isNumber = false;
+                        // Accept numbers, including negative, decimal, and scientific notation
+                        if (content.trim() !== '' && !isNaN(Number(content))) {
+                            isNumber = true;
+                        }
+
+                        ctx.textBaseline = 'bottom'; // Align text to bottom of cell
+                        let textX;
+                        if (isNumber) {
+                            ctx.textAlign = 'right';
+                            textX = currentX + colWidth - 6; // Padding from right
+                        } else {
+                            ctx.textAlign = 'left';
+                            textX = currentX + 4; // Padding from left
+                        }
+                        const textY = currentY + rowHeight - 6;
 
                         // Clip text to fit within cell
                         ctx.save();
