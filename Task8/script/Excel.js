@@ -32,66 +32,7 @@ function debounce(func, delay) {
 
 
 class Grid {
-    commandManager = new CommandManager();
-    // Keyboard shortcut for undo/redo
-    initializeUndoRedoShortcuts() {
-        window.addEventListener('keydown', (e) => {
-            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
-                e.preventDefault();
-                this.commandManager.undo();
-            } else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
-                e.preventDefault();
-                this.commandManager.redo();
-            }
-        });
-    }
-    // --- Generalized auto-scroll for header selection (column/row) ---
-    startAutoScrollHeaderSelection(e) {
-        if (this._autoScrollHeaderActive) return;
-        this._autoScrollHeaderActive = true;
-        const doScroll = () => {
-            if (!this.isSelectingHeader || (this.selectionHeaderType !== "column" && this.selectionHeaderType !== "row")) {
-                this._autoScrollHeaderActive = false;
-                return;
-            }
-            const containerRect = this.container.getBoundingClientRect();
-            const scrollMargin = 15; // px
-            let scrolled = false;
-            if (this.selectionHeaderType === "column") {
-                // Horizontal only for column header
-                if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientX < containerRect.left + scrollMargin) {
-                    this.container.scrollLeft -= 10;
-                    scrolled = true;
-                } else if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientX > containerRect.right - scrollMargin) {
-                    this.container.scrollLeft += 10;
-                    scrolled = true;
-                }
-            } else if (this.selectionHeaderType === "row") {
-                // Vertical only for row header
-                if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientY < containerRect.top + scrollMargin) {
-                    this.container.scrollTop -= 10;
-                    scrolled = true;
-                } else if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientY > containerRect.bottom - scrollMargin) {
-                    this.container.scrollTop += 10;
-                    scrolled = true;
-                }
-            }
-            if (scrolled) {
-                this.renderVisibleTiles();
-                if (this.selectionHeaderType === "column") {
-                    this.handleColumnHeaderMouseMove(this._lastHeaderMouseEvent, true);
-                } else if (this.selectionHeaderType === "row") {
-                    this.handleRowHeaderMouseMove(this._lastHeaderMouseEvent, true);
-                }
-            }
-            if (this.isSelectingHeader && (this.selectionHeaderType === "column" || this.selectionHeaderType === "row")) {
-                window.requestAnimationFrame(doScroll);
-            } else {
-                this._autoScrollHeaderActive = false;
-            }
-        };
-        window.requestAnimationFrame(doScroll);
-    }
+
     constructor(containerId) {
         this.gridWrapper = document.getElementById('grid-wrapper');
         this.container = document.getElementById(containerId);
@@ -161,6 +102,66 @@ class Grid {
         this.rowHeaderCanvas.addEventListener('mousemove', this.handleRowHeaderMouseMove.bind(this));
         window.addEventListener('mouseup', this.handleRowHeaderMouseUp.bind(this));
     }
+    commandManager = new CommandManager();
+    // Keyboard shortcut for undo/redo
+    initializeUndoRedoShortcuts() {
+        window.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
+                e.preventDefault();
+                this.commandManager.undo();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.shiftKey && e.key.toLowerCase() === 'z'))) {
+                e.preventDefault();
+                this.commandManager.redo();
+            }
+        });
+    }
+    // --- Generalized auto-scroll for header selection (column/row) ---
+    startAutoScrollHeaderSelection(e) {
+        if (this._autoScrollHeaderActive) return;
+        this._autoScrollHeaderActive = true;
+        const doScroll = () => {
+            if (!this.isSelectingHeader || (this.selectionHeaderType !== "column" && this.selectionHeaderType !== "row")) {
+                this._autoScrollHeaderActive = false;
+                return;
+            }
+            const containerRect = this.container.getBoundingClientRect();
+            const scrollMargin = 15; // px
+            let scrolled = false;
+            if (this.selectionHeaderType === "column") {
+                // Horizontal only for column header
+                if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientX < containerRect.left + scrollMargin) {
+                    this.container.scrollLeft -= 10;
+                    scrolled = true;
+                } else if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientX > containerRect.right - scrollMargin) {
+                    this.container.scrollLeft += 10;
+                    scrolled = true;
+                }
+            } else if (this.selectionHeaderType === "row") {
+                // Vertical only for row header
+                if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientY < containerRect.top + scrollMargin) {
+                    this.container.scrollTop -= 10;
+                    scrolled = true;
+                } else if (this._lastHeaderMouseEvent && this._lastHeaderMouseEvent.clientY > containerRect.bottom - scrollMargin) {
+                    this.container.scrollTop += 10;
+                    scrolled = true;
+                }
+            }
+            if (scrolled) {
+                this.renderVisibleTiles();
+                if (this.selectionHeaderType === "column") {
+                    this.handleColumnHeaderMouseMove(this._lastHeaderMouseEvent, true);
+                } else if (this.selectionHeaderType === "row") {
+                    this.handleRowHeaderMouseMove(this._lastHeaderMouseEvent, true);
+                }
+            }
+            if (this.isSelectingHeader && (this.selectionHeaderType === "column" || this.selectionHeaderType === "row")) {
+                window.requestAnimationFrame(doScroll);
+            } else {
+                this._autoScrollHeaderActive = false;
+            }
+        };
+        window.requestAnimationFrame(doScroll);
+    }
     handleClick(e) {
         if (e.target.classList.contains('grid-canvas-tile')) {
             const rect = e.target.getBoundingClientRect();
@@ -192,90 +193,6 @@ class Grid {
         this.drawHeaders();
 
     }
-    handleMouseMoveForSelection(e) {
-        if (!this.isSelecting || !this.selectionStart) return;
-
-        const target = e.target.closest('.grid-canvas-tile');
-        if (!target) {
-            // Mouse is outside any canvas tile, extrapolate the cell coordinates
-            const containerRect = this.container.getBoundingClientRect();
-            let x = e.clientX - containerRect.left + this.container.scrollLeft;
-            let y = e.clientY - containerRect.top + this.container.scrollTop;
-
-            // Calculate approximate row and column based on position
-            let row = 0, col = 0;
-            let currentY = 0, currentX = 0;
-
-            // Find row
-            for (let r = 0; r < TOTAL_ROWS; r++) {
-                const rowHeight = this.getRowHeight(r);
-                if (y >= currentY && y < currentY + rowHeight) {
-                    row = r;
-                    break;
-                } else if (y < currentY) {
-                    row = Math.max(0, r - 1);
-                    break;
-                }
-                currentY += rowHeight;
-                if (r === TOTAL_ROWS - 1 && y >= currentY) {
-                    row = TOTAL_ROWS - 1;
-                }
-            }
-
-            // Find column
-            for (let c = 0; c < TOTAL_COLUMNS; c++) {
-                const colWidth = this.getColumnWidth(c);
-                if (x >= currentX && x < currentX + colWidth) {
-                    col = c;
-                    break;
-                } else if (x < currentX) {
-                    col = Math.max(0, c - 1);
-                    break;
-                }
-                currentX += colWidth;
-                if (c === TOTAL_COLUMNS - 1 && x >= currentX) {
-                    col = TOTAL_COLUMNS - 1;
-                }
-            }
-
-            // Create range selection
-            const rangeSelection = new RangeSelection(
-                this.selectionStart.row,
-                this.selectionStart.col,
-                row,
-                col,
-                row, // activeRow
-                col  // activeCol
-            );
-            this.selectionManager.setSelection(rangeSelection);
-            this.selectionManager.scrollSelectionIntoView();
-        } else {
-            // Mouse is within a canvas tile
-            const rect = target.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const tileRow = parseInt(target.dataset.tileRow);
-            const tileCol = parseInt(target.dataset.tileCol);
-
-            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
-            if (cellCoords) {
-                // Create range selection with active cell for correct scrolling
-                const rangeSelection = new RangeSelection(
-                    this.selectionStart.row,
-                    this.selectionStart.col,
-                    cellCoords.row,
-                    cellCoords.col,
-                    cellCoords.row, // activeRow
-                    cellCoords.col  // activeCol
-                );
-                this.selectionManager.setSelection(rangeSelection);
-                this.selectionManager.scrollSelectionIntoView();
-            }
-        }
-
-        this.drawHeaders();
-    }
-
 
     handleMouseUpForSelection(e) {
         this.isSelecting = false;
@@ -890,22 +807,27 @@ class Grid {
             const colWidth = this.getColumnWidth(c);
             // Highlight if selected and allowed
             if (highlightColHeaders && selectedCols.has(c)) {
+                colCtx.lineWidth = 1;
+                colCtx.strokeStyle = '#d1d5db';
+                colCtx.strokeRect(currentX - 0.5, 0, colWidth, HEADER_HEIGHT - 3);
                 colCtx.fillStyle = colHeaderBg;
                 colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
                 colCtx.strokeStyle = '#0F7045';
                 colCtx.lineWidth = 2;
                 // Bottom border
                 colCtx.beginPath();
-                colCtx.moveTo(currentX, HEADER_HEIGHT - 1);
-                colCtx.lineTo(currentX + colWidth, HEADER_HEIGHT - 1);
+                colCtx.moveTo(currentX - 1, HEADER_HEIGHT - 1);
+                colCtx.lineTo(currentX + colWidth + 5, HEADER_HEIGHT - 1);
                 colCtx.stroke();
                 colCtx.lineWidth = 1;
             } else {
                 colCtx.fillStyle = '#f8f8f8';
                 colCtx.fillRect(currentX, 0, colWidth, HEADER_HEIGHT);
+                colCtx.strokeStyle = '#d1d5db';
+                colCtx.strokeRect(currentX - 0.5, 0, colWidth, HEADER_HEIGHT);
             }
-            colCtx.strokeStyle = '#d1d5db';
-            colCtx.strokeRect(currentX - 0.5, 0, colWidth , HEADER_HEIGHT);
+            // colCtx.strokeStyle = '#d1d5db';
+            // colCtx.strokeRect(currentX - 0.5, 0, colWidth, HEADER_HEIGHT);
             colCtx.fillStyle = (highlightColHeaders && selectedCols.has(c)) ? colHeaderText : '#4b5563';
             if (colWidth > 10)
                 colCtx.fillText(getColumnName(c), currentX + colWidth / 2, HEADER_HEIGHT / 2);
@@ -935,22 +857,26 @@ class Grid {
             const rowHeight = this.getRowHeight(r);
             // Highlight if selected and allowed
             if (highlightRowHeaders && selectedRows.has(r)) {
+                rowCtx.lineWidth = 1;
+                rowCtx.strokeStyle = '#d1d5db';
+                rowCtx.strokeRect(0, currentY - 0.5, HEADER_WIDTH -2.4, rowHeight);
                 rowCtx.fillStyle = rowHeaderBg;
                 rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
                 rowCtx.strokeStyle = '#0F7045';
-                rowCtx.lineWidth = 2 / dpr;
+                rowCtx.lineWidth = 2;
                 // Right border
                 rowCtx.beginPath();
                 rowCtx.moveTo(HEADER_WIDTH - 1, currentY);
-                rowCtx.lineTo(HEADER_WIDTH - 1, currentY + rowHeight);
+                rowCtx.lineTo(HEADER_WIDTH - 1, currentY + rowHeight + 2);
                 rowCtx.stroke();
-                rowCtx.lineWidth = 1 / dpr;
+                rowCtx.lineWidth = 1;
+
             } else {
                 rowCtx.fillStyle = '#f8f8f8';
                 rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
+                rowCtx.strokeStyle = '#d1d5db';
+                rowCtx.strokeRect(0, currentY - 0.5, HEADER_WIDTH, rowHeight);
             }
-            rowCtx.strokeStyle = '#d1d5db';
-            rowCtx.strokeRect(0, currentY - 0.5, HEADER_WIDTH, rowHeight);
             rowCtx.fillStyle = (highlightRowHeaders && selectedRows.has(r)) ? rowHeaderText : '#4b5563';
             if (rowHeight > 10) {
                 const text = `${r + 1}`;
@@ -1211,27 +1137,31 @@ class Grid {
         if (this._autoScrollActive) return;
         this._autoScrollActive = true;
         const doScroll = () => {
+
             if (!this.isSelecting) {
                 this._autoScrollActive = false;
                 return;
             }
+            console.log("startAutoScrollSelection");;
             const containerRect = this.container.getBoundingClientRect();
             const scrollMargin = 10; // px
             let scrolled = false;
+            const lasstX = this._lastMouseEvent.clientX;
+            const lastY = this._lastMouseEvent.clientY;
             // Horizontal
             if (this._lastMouseEvent && this._lastMouseEvent.clientX < containerRect.left + scrollMargin) {
-                this.container.scrollLeft -= 10;
+                this.container.scrollLeft -= 2;
                 scrolled = true;
             } else if (this._lastMouseEvent && this._lastMouseEvent.clientX > containerRect.right - scrollMargin) {
-                this.container.scrollLeft += 10;
+                this.container.scrollLeft += 2;
                 scrolled = true;
             }
             // Vertical
             if (this._lastMouseEvent && this._lastMouseEvent.clientY < containerRect.top + scrollMargin) {
-                this.container.scrollTop -= 10;
+                this.container.scrollTop -= 2;
                 scrolled = true;
             } else if (this._lastMouseEvent && this._lastMouseEvent.clientY > containerRect.bottom - scrollMargin) {
-                this.container.scrollTop += 10;
+                this.container.scrollTop += 2;
                 scrolled = true;
             }
             if (scrolled) {
@@ -1240,9 +1170,10 @@ class Grid {
                 // Call the selection update logic
                 this.handleMouseMoveForSelection(this._lastMouseEvent, true);
             }
-            if (this.isSelecting) {
-                window.requestAnimationFrame(doScroll);
-            } else {
+            if (this.isSelecting && this._lastMouseEvent.clientX == lasstX && this._lastMouseEvent.clientY == lastY) {
+                setTimeout(doScroll, 200); // If no movement, wait a bit before next scroll
+            }
+            else {
                 this._autoScrollActive = false;
             }
         };
@@ -1250,6 +1181,8 @@ class Grid {
     }
 
     handleMouseMoveForSelection(e, fromAutoScroll) {
+        // console.log("handleMouseMoveForSelection2");
+
         this._lastMouseEvent = e;
         if (!fromAutoScroll) this.startAutoScrollSelection(e);
         if (!this.isSelecting || !this.selectionStart) return;
@@ -1259,6 +1192,7 @@ class Grid {
 
         const target = e.target.closest('.grid-canvas-tile');
         if (!target) {
+            console.log("Mouse is outside any canvas tile, extrapolating cell coordinates");
             // Mouse is outside any canvas tile, extrapolate the cell coordinates
             const containerRect = this.container.getBoundingClientRect();
             let x = e.clientX - containerRect.left + this.container.scrollLeft;

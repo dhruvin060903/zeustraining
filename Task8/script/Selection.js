@@ -9,7 +9,7 @@ export class SelectionManager {
 
     handleKeydown(e) {
         console.log("keydown event", e.key);
-        // e.preventDefault();
+
         if (this.grid.isEditing) {
             return;
         }
@@ -73,7 +73,7 @@ export class SelectionManager {
             if (this.grid.cellInput) {
                 this.grid.cellInput.value = key;
                 this.grid.cellInput.focus();
-                this.grid.cellInput.setSelectionRange(1, 1); // Cursor after character
+                // this.grid.cellInput.setSelectionRange(1, 1); // Cursor after character
             }
 
             // e.preventDefault(); // Prevent browser default (e.g., scrolling)

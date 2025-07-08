@@ -117,11 +117,9 @@ export class CanvasTile {
         // Determine anchor cell and its content for range selection
         let anchorRow = null, anchorCol = null, anchorContent = null;
         if (selection.type === 'range') {
-            // Always use the cell where the user started the drag (the selectionStart in Grid)
-            // This is always passed as selection.startAnchorRow and selection.startAnchorCol (we will add this if not present)
             anchorRow = (typeof selection.startAnchorRow === 'number') ? selection.startAnchorRow : this.grid.selectionStart?.row;
             anchorCol = (typeof selection.startAnchorCol === 'number') ? selection.startAnchorCol : this.grid.selectionStart?.col;
-            // Fallback to startRow/startCol if not available
+
             if (typeof anchorRow !== 'number') anchorRow = selection.startRow;
             if (typeof anchorCol !== 'number') anchorCol = selection.startCol;
             anchorContent = this.grid.getCell(anchorRow, anchorCol)?.value || '';
@@ -273,20 +271,20 @@ export class CanvasTile {
         ctx.lineWidth = width;
         // Always draw left and right borders
         ctx.beginPath();
-        ctx.moveTo(currentX + 1, 1);
+        ctx.moveTo(currentX + 1, -2);
         ctx.lineTo(currentX + 1, this.height - 1);
-        ctx.moveTo(currentX + colWidth - 1, 1);
+        ctx.moveTo(currentX + colWidth - 1, -2);
         ctx.lineTo(currentX + colWidth - 1, this.height - 1);
         // Draw top border if this is the first tile row
-        if (this.startGlobalRow === 0) {
-            ctx.moveTo(currentX + 1, 1);
-            ctx.lineTo(currentX + colWidth - 1, 1);
-        }
+        // if (this.startGlobalRow === 0) {
+        //     ctx.moveTo(currentX + 1, 1);
+        //     ctx.lineTo(currentX + colWidth - 1, 1);
+        // }
         // Draw bottom border if this is the last tile row
-        if (this.endGlobalRow === TOTAL_ROWS) {
-            ctx.moveTo(currentX + 1, this.height - 1);
-            ctx.lineTo(currentX + colWidth - 1, this.height - 1);
-        }
+        // if (this.endGlobalRow === TOTAL_ROWS) {
+        //     ctx.moveTo(currentX + 1, this.height - 1);
+        //     ctx.lineTo(currentX + colWidth - 1, this.height - 1);
+        // }
         ctx.stroke();
         ctx.restore();
     }
@@ -304,20 +302,20 @@ export class CanvasTile {
         ctx.lineWidth = width;
         // Always draw top and bottom borders
         ctx.beginPath();
-        ctx.moveTo(1, currentY + 1);
+        ctx.moveTo(-1, currentY + 1);
         ctx.lineTo(this.width - 1, currentY + 1);
-        ctx.moveTo(1, currentY + rowHeight - 1);
-        ctx.lineTo(this.width - 1, currentY + rowHeight - 1);
+        ctx.moveTo(-1, currentY + rowHeight - 1.4);
+        ctx.lineTo(this.width - 1, currentY + rowHeight - 1.2);
         // Draw left border if this is the first tile column
-        if (this.startGlobalCol === 0) {
-            ctx.moveTo(1, currentY + 1);
-            ctx.lineTo(1, currentY + rowHeight - 1);
-        }
-        // Draw right border if this is the last tile column
-        if (this.endGlobalCol === TOTAL_COLUMNS) {
-            ctx.moveTo(this.width - 1, currentY + 1);
-            ctx.lineTo(this.width - 1, currentY + rowHeight - 1);
-        }
+        // if (this.startGlobalCol === 0) {
+        //     ctx.moveTo(1, currentY + 1);
+        //     ctx.lineTo(1, currentY + rowHeight - 1);
+        // }
+        // // Draw right border if this is the last tile column
+        // if (this.endGlobalCol === TOTAL_COLUMNS) {
+        //     ctx.moveTo(this.width - 1, currentY + 1);
+        //     ctx.lineTo(this.width - 1, currentY + rowHeight - 1);
+        // }
         ctx.stroke();
         ctx.restore();
     }
