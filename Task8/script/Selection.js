@@ -6,6 +6,130 @@ export class SelectionManager {
         document.addEventListener('keydown', this.handleKeydown.bind(this));
 
     }
+    handleMouseUpForSelection(e) {
+        this.grid.isSelecting = false;
+        // this.selectionStart = null;
+        this.grid.selectionManager.renderSelection();
+        this.grid.finishCellEdit();
+        this.grid.updateStatusBar();
+
+    }
+
+    handleMouseDown(e) {
+        if (!this.grid.eventManager.hitTest(e, 'grid')) return;
+        if (e.target.classList.contains('grid-canvas-tile')) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const tileRow = parseInt(e.target.dataset.tileRow);
+            const tileCol = parseInt(e.target.dataset.tileCol);
+
+            const cellCoords = this.grid.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                this.grid.isSelecting = true;
+                this.grid.selectionStart = cellCoords;
+                // e.preventDefault();
+            }
+        }
+    }
+
+
+    handleMouseMoveForSelection(e, fromAutoScroll) {
+        // console.log("handleMouseMoveForSelection2");
+
+        if (!this.grid.eventManager.hitTest(e, 'grid')) return;
+        this.grid._lastMouseEvent = e;
+        if (!fromAutoScroll) this.grid.startAutoScrollSelection(e);
+        if (!this.grid.isSelecting || !this.grid.selectionStart) return;
+
+        const anchorRow = this.grid.selectionStart.row;
+        const anchorCol = this.grid.selectionStart.col;
+
+        const target = e.target.closest('.grid-canvas-tile');
+        if (!target) {
+            // Mouse is outside any canvas tile, extrapolating cell coordinates
+            const containerRect = this.grid.container.getBoundingClientRect();
+            let x = e.clientX - containerRect.left + this.grid.container.scrollLeft;
+            let y = e.clientY - containerRect.top + this.grid.container.scrollTop;
+
+            // Calculate approximate row and column based on position
+            let row = 0, col = 0;
+            let currentY = 0, currentX = 0;
+
+            // Find row
+            for (let r = 0; r < TOTAL_ROWS; r++) {
+                const rowHeight = this.grid.getRowHeight(r);
+                if (y >= currentY && y < currentY + rowHeight) {
+                    row = r;
+                    break;
+                } else if (y < currentY) {
+                    row = Math.max(0, r - 1);
+                    break;
+                }
+                currentY += rowHeight;
+                if (r === TOTAL_ROWS - 1 && y >= currentY) {
+                    row = TOTAL_ROWS - 1;
+                }
+            }
+
+            // Find column
+            for (let c = 0; c < TOTAL_COLUMNS; c++) {
+                const colWidth = this.grid.getColumnWidth(c);
+                if (x >= currentX && x < currentX + colWidth) {
+                    col = c;
+                    break;
+                } else if (x < currentX) {
+                    col = Math.max(0, c - 1);
+                    break;
+                }
+                currentX += colWidth;
+                if (c === TOTAL_COLUMNS - 1 && x >= currentX) {
+                    col = TOTAL_COLUMNS - 1;
+                }
+            }
+
+            // Create range selection and pass anchor
+            const rangeSelection = new RangeSelection(
+                anchorRow,
+                anchorCol,
+                row,
+                col,
+                row, // activeRow
+                col  // activeCol
+            );
+            rangeSelection.startAnchorRow = anchorRow;
+            rangeSelection.startAnchorCol = anchorCol;
+            this.grid.selectionManager.setSelection(rangeSelection);
+            this.grid.selectionManager.scrollSelectionIntoView();
+        } else {
+            // Mouse is within a canvas tile
+            const rect = target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const tileRow = parseInt(target.dataset.tileRow);
+            const tileCol = parseInt(target.dataset.tileCol);
+
+            const cellCoords = this.grid.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                // Create range selection with active cell for correct scrolling
+                const rangeSelection = new RangeSelection(
+                    anchorRow,
+                    anchorCol,
+                    cellCoords.row,
+                    cellCoords.col,
+                    cellCoords.row, // activeRow
+                    cellCoords.col  // activeCol
+                );
+                rangeSelection.startAnchorRow = anchorRow;
+                rangeSelection.startAnchorCol = anchorCol;
+                this.grid.selectionManager.setSelection(rangeSelection);
+                this.grid.selectionManager.scrollSelectionIntoView();
+            }
+        }
+
+        this.grid.drawHeaders();
+    }
 
     handleKeydown(e) {
         console.log("keydown event", e.key);

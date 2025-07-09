@@ -5,7 +5,7 @@ import { CanvasTile } from "./canvasTile.js";
 import { getColumnName } from "./column.js";
 import { SelectionManager, CellSelection, ColumnSelection, RowSelection, RangeSelection } from "./Selection.js";
 import { CommandManager, EditCellCommand, ResizeColumnCommand, ResizeRowCommand } from "./CommandManager.js";
-
+import { EventManager } from "./EventManager.js";
 import {
     TOTAL_ROWS,
     TOTAL_COLUMNS,
@@ -62,8 +62,9 @@ class Grid {
         this.rowHeaderCanvas = document.getElementById('row-header-canvas');
         this.rowHeaderCtx = this.rowHeaderCanvas.getContext('2d');
         this.selectionManager = new SelectionManager(this);
+        this.eventManager = new EventManager(this);
         this.selectionManager.grid = this;
-        window.grid = this;
+
 
         this.isSelecting = false;
         this.selectionStart = null;
@@ -88,19 +89,6 @@ class Grid {
         window.addEventListener('resize', this.handleResize);
         this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
         this.container.addEventListener('click', this.handleClick.bind(this));
-        // this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
-        window.addEventListener('mousedown', this.handleMouseDown.bind(this));
-        window.addEventListener('mousemove', this.handleMouseMoveForSelection.bind(this));
-        window.addEventListener('mouseup', this.handleMouseUpForSelection.bind(this));
-
-        // Add header listeners for multi-select
-        this.colHeaderCanvas.addEventListener('mousedown', this.handleColumnHeaderMouseDown.bind(this));
-        this.colHeaderCanvas.addEventListener('mousemove', this.handleColumnHeaderMouseMove.bind(this));
-
-        window.addEventListener('mouseup', this.handleColumnHeaderMouseUp.bind(this));
-        this.rowHeaderCanvas.addEventListener('mousedown', this.handleRowHeaderMouseDown.bind(this));
-        this.rowHeaderCanvas.addEventListener('mousemove', this.handleRowHeaderMouseMove.bind(this));
-        window.addEventListener('mouseup', this.handleRowHeaderMouseUp.bind(this));
     }
     commandManager = new CommandManager();
     // Keyboard shortcut for undo/redo
@@ -300,20 +288,7 @@ class Grid {
         this.selectionManager.setSelection(cellSelection);
         this.updateStatusBar();
     }
-    // selectCell(row, col) {
-    //     if (this.isEditing) {
-    //         this.finishCellEdit();
-    //     }
 
-    //     const previousSelection = this.selectedCell;
-    //     this.selectedCell = { row, col };
-
-    //     // Redraw affected tiles
-    //     if (previousSelection) {
-    //         this.redrawCellInTiles(previousSelection.row, previousSelection.col);
-    //     }
-    //     this.redrawCellInTiles(row, col);
-    // }
     selectColumn(col) {
         if (this.isEditing) {
             this.finishCellEdit();
@@ -859,7 +834,7 @@ class Grid {
             if (highlightRowHeaders && selectedRows.has(r)) {
                 rowCtx.lineWidth = 1;
                 rowCtx.strokeStyle = '#d1d5db';
-                rowCtx.strokeRect(0, currentY - 0.5, HEADER_WIDTH -2.4, rowHeight);
+                rowCtx.strokeRect(0, currentY - 0.5, HEADER_WIDTH - 2.4, rowHeight);
                 rowCtx.fillStyle = rowHeaderBg;
                 rowCtx.fillRect(0, currentY, HEADER_WIDTH, rowHeight);
                 rowCtx.strokeStyle = '#0F7045';
@@ -1023,115 +998,6 @@ class Grid {
         const avg = sum / count;
         statusBar.textContent = `Count: ${count}    Sum: ${sum}    Min: ${min}    Max: ${max}    Avg: ${avg.toFixed(2)}`;
     }
-
-    handleColumnHeaderMouseDown(e) {
-        const rect = this.colHeaderCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left + this.container.scrollLeft;
-        let currentX = 0;
-        for (let c = 0; c < TOTAL_COLUMNS; c++) {
-            const colWidth = this.getColumnWidth(c);
-            if (x >= currentX && x < currentX + colWidth) {
-                this.isSelectingHeader = true;
-                this.selectionHeaderType = "column";
-                this.selectionHeaderStart = c;
-                // Start with single column selection
-                this.selectColumn(c);
-                break;
-            }
-            currentX += colWidth;
-        }
-    }
-    handleColumnHeaderMouseMove(e, fromAutoScroll) {
-        this._lastHeaderMouseEvent = e;
-        if (!fromAutoScroll) this.startAutoScrollHeaderSelection(e);
-        if (!this.isSelectingHeader || this.selectionHeaderType !== "column") return;
-        const rect = this.colHeaderCanvas.getBoundingClientRect();
-        const x = e.clientX - rect.left + this.container.scrollLeft;
-        let currentX = 0;
-        for (let c = 0; c < TOTAL_COLUMNS; c++) {
-            const colWidth = this.getColumnWidth(c);
-            if (x >= currentX && x < currentX + colWidth) {
-                // Range selection from anchor to current
-                const anchorCol = this.selectionHeaderStart;
-                const anchorRow = 0;
-                const rangeSelection = new RangeSelection(
-                    anchorRow,
-                    anchorCol,
-                    TOTAL_ROWS - 1,
-                    c,
-                    0, c // active cell at top of current col
-                );
-                rangeSelection.startAnchorRow = anchorRow;
-                rangeSelection.startAnchorCol = anchorCol;
-                this.selectionManager.setSelection(rangeSelection);
-                this.drawHeaders();
-                break;
-            }
-            currentX += colWidth;
-        }
-    }
-    handleColumnHeaderMouseUp(e) {
-        if (this.isSelectingHeader && this.selectionHeaderType === "column") {
-            this.isSelectingHeader = false;
-            this.selectionHeaderType = null;
-            this.selectionHeaderStart = null;
-        }
-    }
-
-    // --- Multi-row selection support ---
-    handleRowHeaderMouseDown(e) {
-        const rect = this.rowHeaderCanvas.getBoundingClientRect();
-        const y = e.clientY - rect.top + this.container.scrollTop;
-        let currentY = 0;
-        for (let r = 0; r < TOTAL_ROWS; r++) {
-            const rowHeight = this.getRowHeight(r);
-            if (y >= currentY && y < currentY + rowHeight) {
-                this.isSelectingHeader = true;
-                this.selectionHeaderType = "row";
-                this.selectionHeaderStart = r;
-                // Start with single row selection
-                this.selectRow(r);
-                break;
-            }
-            currentY += rowHeight;
-        }
-    }
-    handleRowHeaderMouseMove(e, fromAutoScroll) {
-        this._lastHeaderMouseEvent = e;
-        if (!fromAutoScroll) this.startAutoScrollHeaderSelection(e);
-        if (!this.isSelectingHeader || this.selectionHeaderType !== "row") return;
-        const rect = this.rowHeaderCanvas.getBoundingClientRect();
-        const y = e.clientY - rect.top + this.container.scrollTop;
-        let currentY = 0;
-        for (let r = 0; r < TOTAL_ROWS; r++) {
-            const rowHeight = this.getRowHeight(r);
-            if (y >= currentY && y < currentY + rowHeight) {
-                // Range selection from anchor to current
-                const anchorRow = this.selectionHeaderStart;
-                const anchorCol = 0;
-                const rangeSelection = new RangeSelection(
-                    anchorRow,
-                    anchorCol,
-                    r,
-                    TOTAL_COLUMNS - 1,
-                    r, 0 // active cell at left of current row
-                );
-                rangeSelection.startAnchorRow = anchorRow;
-                rangeSelection.startAnchorCol = anchorCol;
-                this.selectionManager.setSelection(rangeSelection);
-                this.drawHeaders();
-                break;
-            }
-            currentY += rowHeight;
-        }
-    }
-    handleRowHeaderMouseUp(e) {
-        if (this.isSelectingHeader && this.selectionHeaderType === "row") {
-            this.isSelectingHeader = false;
-            this.selectionHeaderType = null;
-            this.selectionHeaderStart = null;
-        }
-    }
     // --- Improved auto-scroll for range selection using requestAnimationFrame ---
     startAutoScrollSelection(e) {
         if (this._autoScrollActive) return;
@@ -1168,7 +1034,7 @@ class Grid {
                 // Always re-render visible tiles to fix missing canvas/selection when scrolling up/left
                 this.renderVisibleTiles();
                 // Call the selection update logic
-                this.handleMouseMoveForSelection(this._lastMouseEvent, true);
+                this.selectionManager.handleMouseMoveForSelection(this._lastMouseEvent, true);
             }
             if (this.isSelecting && this._lastMouseEvent.clientX == lasstX && this._lastMouseEvent.clientY == lastY) {
                 setTimeout(doScroll, 200); // If no movement, wait a bit before next scroll
@@ -1180,101 +1046,6 @@ class Grid {
         window.requestAnimationFrame(doScroll);
     }
 
-    handleMouseMoveForSelection(e, fromAutoScroll) {
-        // console.log("handleMouseMoveForSelection2");
-
-        this._lastMouseEvent = e;
-        if (!fromAutoScroll) this.startAutoScrollSelection(e);
-        if (!this.isSelecting || !this.selectionStart) return;
-
-        const anchorRow = this.selectionStart.row;
-        const anchorCol = this.selectionStart.col;
-
-        const target = e.target.closest('.grid-canvas-tile');
-        if (!target) {
-            console.log("Mouse is outside any canvas tile, extrapolating cell coordinates");
-            // Mouse is outside any canvas tile, extrapolate the cell coordinates
-            const containerRect = this.container.getBoundingClientRect();
-            let x = e.clientX - containerRect.left + this.container.scrollLeft;
-            let y = e.clientY - containerRect.top + this.container.scrollTop;
-
-            // Calculate approximate row and column based on position
-            let row = 0, col = 0;
-            let currentY = 0, currentX = 0;
-
-            // Find row
-            for (let r = 0; r < TOTAL_ROWS; r++) {
-                const rowHeight = this.getRowHeight(r);
-                if (y >= currentY && y < currentY + rowHeight) {
-                    row = r;
-                    break;
-                } else if (y < currentY) {
-                    row = Math.max(0, r - 1);
-                    break;
-                }
-                currentY += rowHeight;
-                if (r === TOTAL_ROWS - 1 && y >= currentY) {
-                    row = TOTAL_ROWS - 1;
-                }
-            }
-
-            // Find column
-            for (let c = 0; c < TOTAL_COLUMNS; c++) {
-                const colWidth = this.getColumnWidth(c);
-                if (x >= currentX && x < currentX + colWidth) {
-                    col = c;
-                    break;
-                } else if (x < currentX) {
-                    col = Math.max(0, c - 1);
-                    break;
-                }
-                currentX += colWidth;
-                if (c === TOTAL_COLUMNS - 1 && x >= currentX) {
-                    col = TOTAL_COLUMNS - 1;
-                }
-            }
-
-            // Create range selection and pass anchor
-            const rangeSelection = new RangeSelection(
-                anchorRow,
-                anchorCol,
-                row,
-                col,
-                row, // activeRow
-                col  // activeCol
-            );
-            rangeSelection.startAnchorRow = anchorRow;
-            rangeSelection.startAnchorCol = anchorCol;
-            this.selectionManager.setSelection(rangeSelection);
-            this.selectionManager.scrollSelectionIntoView();
-        } else {
-            // Mouse is within a canvas tile
-            const rect = target.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const tileRow = parseInt(target.dataset.tileRow);
-            const tileCol = parseInt(target.dataset.tileCol);
-
-            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
-            if (cellCoords) {
-                // Create range selection with active cell for correct scrolling
-                const rangeSelection = new RangeSelection(
-                    anchorRow,
-                    anchorCol,
-                    cellCoords.row,
-                    cellCoords.col,
-                    cellCoords.row, // activeRow
-                    cellCoords.col  // activeCol
-                );
-                rangeSelection.startAnchorRow = anchorRow;
-                rangeSelection.startAnchorCol = anchorCol;
-                this.selectionManager.setSelection(rangeSelection);
-                this.selectionManager.scrollSelectionIntoView();
-            }
-        }
-
-        this.drawHeaders();
-    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
