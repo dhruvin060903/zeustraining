@@ -1,4 +1,3 @@
-// Command pattern for undo/redo support in grid (cell edit, resize)
 
 export class CommandManager {
     constructor() {

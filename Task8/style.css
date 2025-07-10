@@ -2,9 +2,9 @@ body {
   font-family: "Times New Roman", Times, serif, sans-serif;
   margin: 0;
   padding: 0;
-  display: flex;
+  /* display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center; */
   background-color: #f0f2f5;
 }
 

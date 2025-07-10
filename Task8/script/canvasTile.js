@@ -20,7 +20,9 @@ export class CanvasTile {
 
         this.updateDimensions();
     }
-
+    /**
+        * This method updates the dimensions of the tile based on the current column and row sizes.
+        */
     updateDimensions() {
         let tileWidth = 0;
         let tileHeight = 0;
@@ -62,6 +64,9 @@ export class CanvasTile {
         this.canvasElement.dataset.tileRow = this.tileRowIndex;
         this.canvasElement.dataset.tileCol = this.tileColIndex;
     }
+    /**
+    * This method draws the tile on the canvas.
+    */
     draw() {
         this.updateDimensions();
         const ctx = this.ctx;
@@ -180,7 +185,9 @@ export class CanvasTile {
             this.drawColumnBorder(selection.col, '#137E43', 2);
         }
     }
-
+    /**
+        * Draws a border around a specific cell in this tile.
+        */
     drawCellBorder(ctx, row, col, color = '#137E43', width = 2) {
         if (
             row < this.startGlobalRow || row >= this.endGlobalRow ||
@@ -195,10 +202,12 @@ export class CanvasTile {
         ctx.save();
         ctx.strokeStyle = color;
         ctx.lineWidth = width;
-        ctx.strokeRect(x - 1, y - 1, colWidth, rowHeight);
+        ctx.strokeRect(x, y, colWidth, rowHeight);
         ctx.restore();
     }
-
+    /**
+        * Draws a border around a range of cells in this tile.
+        */
     drawRangeBorder(ctx, startRow, startCol, endRow, endCol, color = '#137E43', width = 2) {
         // Only draw if any part of the range is in this tile
         const minRow = Math.max(this.startGlobalRow, startRow);
@@ -224,8 +233,8 @@ export class CanvasTile {
         // Top border: only if this tile contains the top edge
         if (this.startGlobalRow <= startRow && startRow < this.endGlobalRow) {
             ctx.beginPath();
-            ctx.moveTo(xLeft - 1, yTop - 1);
-            ctx.lineTo(xLeft + widthPx + 1, yTop - 1);
+            ctx.moveTo(xLeft - 1, yTop);
+            ctx.lineTo(xLeft + widthPx + 1, yTop);
             ctx.stroke();
         }
         // Bottom border: only if this tile contains the bottom edge
@@ -241,8 +250,8 @@ export class CanvasTile {
         // Left border: only if this tile contains the left edge
         if (this.startGlobalCol <= startCol && startCol < this.endGlobalCol) {
             ctx.beginPath();
-            ctx.moveTo(xLeft - 1, yTop - 2);
-            ctx.lineTo(xLeft - 1, yTop + height + 1);
+            ctx.moveTo(xLeft, yTop - 2);
+            ctx.lineTo(xLeft, yTop + height + 1);
             ctx.stroke();
         }
         // Right border: only if this tile contains the right edge
@@ -257,7 +266,10 @@ export class CanvasTile {
         }
         ctx.restore();
     }
-
+    /**
+        * Draws a border around a specific column in this tile.
+        * @param {number} colIndex - The global column index to draw the border for
+        */
     drawColumnBorder(colIndex, color = '#137E43', width = 2) {
         if (colIndex < this.startGlobalCol || colIndex >= this.endGlobalCol) return;
         const ctx = this.ctx;
@@ -288,7 +300,9 @@ export class CanvasTile {
         ctx.stroke();
         ctx.restore();
     }
-
+    /**
+        * Draws a border around a specific row in this tile.
+        */
     drawRowBorder(rowIndex, color = '#137E43', width = 2) {
         if (rowIndex < this.startGlobalRow || rowIndex >= this.endGlobalRow) return;
         const ctx = this.ctx;
@@ -383,6 +397,10 @@ export class CanvasTile {
             currentY += rowHeight;
         }
     }
+
+    /**
+    * Draws a single cell in this tile.
+    */
     drawSingleCell(row, col) {
         // Ensure the cell is within this tile's range
         console.log(row, col)

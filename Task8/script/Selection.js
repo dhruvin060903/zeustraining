@@ -1,23 +1,49 @@
 import { TOTAL_COLUMNS, TOTAL_ROWS } from './config.js';
 export class SelectionManager {
+    /**
+     * Creates a new SelectionManager for the grid.
+     * @param {Object} grid - The grid instance this manager operates on.
+     */
     constructor(grid) {
+        /**
+         * Reference to the grid instance.
+         * @type {Object}
+         */
         this.grid = grid;
+        /**
+         * The current active selection (cell, range, row, or column).
+         * @type {CellSelection|RangeSelection|RowSelection|ColumnSelection|null}
+         */
         this.activeSelection = null;
+        // Listen for keyboard navigation and editing
         document.addEventListener('keydown', this.handleKeydown.bind(this));
-
     }
-    handleMouseUpForSelection(e) {
+    hitTest(e) {
+        console.log((e.target.classList && e.target.classList.contains('grid-canvas-tile')) || e.target === this.grid.container)
+        if ((e.target.classList && e.target.classList.contains('grid-canvas-tile')) || e.target === this.grid.container) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
+    * Handles mouse up event to finish selection and update UI.
+    */
+    pointerUp(e) {
         this.grid.isSelecting = false;
         // this.selectionStart = null;
         this.grid.selectionManager.renderSelection();
         this.grid.finishCellEdit();
         this.grid.updateStatusBar();
-
     }
-
-    handleMouseDown(e) {
-        if (!this.grid.eventManager.hitTest(e, 'grid')) return;
-        if (e.target.classList.contains('grid-canvas-tile')) {
+    /**
+    * Handles mouse down event to start a new selection if on a grid tile.
+    */
+    pointerdown(e) {
+        console.log("pointerdown event");
+        // if (e.target.classList.contains('grid-canvas-tile')) {
             const rect = e.target.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
@@ -31,14 +57,13 @@ export class SelectionManager {
                 this.grid.selectionStart = cellCoords;
                 // e.preventDefault();
             }
-        }
+        // }
     }
+    /**
+     * Handles mouse move event for updating selection range, including extrapolation when outside tiles.
+     */
+    pointerMove(e, fromAutoScroll) {
 
-
-    handleMouseMoveForSelection(e, fromAutoScroll) {
-        // console.log("handleMouseMoveForSelection2");
-
-        if (!this.grid.eventManager.hitTest(e, 'grid')) return;
         this.grid._lastMouseEvent = e;
         if (!fromAutoScroll) this.grid.startAutoScrollSelection(e);
         if (!this.grid.isSelecting || !this.grid.selectionStart) return;
@@ -131,6 +156,11 @@ export class SelectionManager {
         this.grid.drawHeaders();
     }
 
+  
+
+    /**
+     * Handles keyboard navigation and editing for the grid selection.
+     */
     handleKeydown(e) {
         console.log("keydown event", e.key);
 
@@ -204,6 +234,9 @@ export class SelectionManager {
         }
 
     }
+    /**
+     * Handles ArrowUp key to move selection up.
+     */
     handleArrowUp() {
         console.log("ArrowUp pressed");
         if (this.activeSelection) {
@@ -215,6 +248,9 @@ export class SelectionManager {
             }
         }
     }
+    /**
+     * Handles ArrowLeft key to move selection left.
+     */
     handleArrowLeft() {
         console.log("ArrowLeft pressed");
         if (this.activeSelection) {
@@ -228,6 +264,9 @@ export class SelectionManager {
             }
         }
     }
+    /**
+     * Handles ArrowRight key to move selection right.
+     */
     handleArrowRight() {
         console.log("ArrowRight pressed");
         if (this.activeSelection) {
@@ -239,6 +278,9 @@ export class SelectionManager {
             }
         }
     }
+    /**
+     * Handles ArrowDown key to move selection down.
+     */
     handleArrowDown() {
         console.log("ArrowDown pressed");
         if (this.activeSelection) {
@@ -251,11 +293,18 @@ export class SelectionManager {
             }
         }
     }
+    /**
+     * Sets the current selection and redraws it.
+     * @param {CellSelection|RangeSelection|RowSelection|ColumnSelection} selection
+     */
     setSelection(selection) {
         this.activeSelection = selection;
         this.scrollSelectionIntoView();
         this.grid.redrawSelection(); // Redraw selection on canvas
     }
+    /**
+     * Scrolls the grid to ensure the active selection is visible.
+     */
     scrollSelectionIntoView() {
         if (!this.activeSelection) return;
         let row = 0, col = 0;
@@ -299,13 +348,22 @@ export class SelectionManager {
             container.scrollTop = top + rowHeight - container.clientHeight;
         }
     }
+    /**
+     * Clears the current selection and redraws the grid.
+     */
     clearSelection() {
         this.activeSelection = null;
         this.grid.redrawSelection();
     }
+    /**
+     * Redraws the current selecti`on on the grid.
+     */
     renderSelection() {
         this.grid.redrawSelection();
     }
+    /**
+     * Handles scroll events to redraw the selection.
+     */
     handleScroll() {
         this.grid.redrawSelection();
     }

@@ -4,6 +4,8 @@ import { Cell } from "./cell.js";
 import { CanvasTile } from "./canvasTile.js";
 import { getColumnName } from "./column.js";
 import { SelectionManager, CellSelection, ColumnSelection, RowSelection, RangeSelection } from "./Selection.js";
+import { ColResizeHandler } from "./ColResizeHandler.js";
+import { RowResizeHandler } from "./RowResizeHandler.js";
 import { CommandManager, EditCellCommand, ResizeColumnCommand, ResizeRowCommand } from "./CommandManager.js";
 import { EventManager } from "./EventManager.js";
 import {
@@ -18,6 +20,8 @@ import {
     TILE_BUFFER_ROWS,
     TILE_BUFFER_COLS
 } from './config.js';
+import { ColumnSelectionHandler } from "./ColumnSelectionHandler.js";
+import { RowSelectionHandler } from "./RowSelectionHandler.js";
 
 
 // for reduce multiple calling
@@ -31,8 +35,16 @@ function debounce(func, delay) {
 }
 
 
+
+/**
+ * Main Grid class for managing spreadsheet/grid logic, rendering, and user interaction.
+ */
 class Grid {
 
+    /**
+     * Constructs a new Grid instance and initializes the grid.
+     * @param {string} containerId - The DOM id of the grid container element.
+     */
     constructor(containerId) {
         this.gridWrapper = document.getElementById('grid-wrapper');
         this.container = document.getElementById(containerId);
@@ -43,9 +55,9 @@ class Grid {
 
         this.initializeUndoRedoShortcuts();
 
-        this.columns = [];
-        this.rows = [];
-        this.cells = new Map();
+        this.columns = []; // Array of GridColumn objects representing all columns in the grid
+        this.rows = [];    // Array of GridRow objects representing all rows in the grid
+        this.cells = new Map(); // Map to store Cell objects, keyed by 'row_col' string
 
         for (let i = 0; i < TOTAL_COLUMNS; i++) {
             this.columns.push(new GridColumn(i));
@@ -55,28 +67,38 @@ class Grid {
             this.rows.push(new GridRow(i));
         }
 
-        this.canvasTiles = new Map();
-        this.contentSizer = document.getElementById('grid-content-sizer');
-        this.colHeaderCanvas = document.getElementById('column-header-canvas');
-        this.colHeaderCtx = this.colHeaderCanvas.getContext('2d');
-        this.rowHeaderCanvas = document.getElementById('row-header-canvas');
-        this.rowHeaderCtx = this.rowHeaderCanvas.getContext('2d');
-        this.selectionManager = new SelectionManager(this);
-        this.eventManager = new EventManager(this);
-        this.selectionManager.grid = this;
+        this.canvasTiles = new Map(); // Map of CanvasTile objects for visible grid regions
+        this.contentSizer = document.getElementById('grid-content-sizer'); // DOM element for sizing grid content
+        this.colHeaderCanvas = document.getElementById('column-header-canvas'); // Canvas for column headers
+        this.colHeaderCtx = this.colHeaderCanvas.getContext('2d'); // 2D context for column header canvas
+        this.rowHeaderCanvas = document.getElementById('row-header-canvas'); // Canvas for row headers
+        this.rowHeaderCtx = this.rowHeaderCanvas.getContext('2d'); // 2D context for row header canvas
+        this.selectionManager = new SelectionManager(this); // Manages cell/row/column/range selection
+        this.eventManager = new EventManager(this); // Handles all grid-related events
+        this.selectionManager.grid = this; // Ensure selectionManager has reference to this grid
+        this.columnSelectionHandler = new ColumnSelectionHandler(this); // Column selection handler
+        this.rowSelectionHandler = new RowSelectionHandler(this); // Column selection handler
 
+        this.eventManager.RegisterHandler(this.columnSelectionHandler); // Register column selection handler
+        this.eventManager.RegisterHandler(this.rowSelectionHandler);    // Register row selection handler
+        this.eventManager.RegisterHandler(this.selectionManager);       // Register selection manager
+        // Register resize handlers
+        this.colResizeHandler = new ColResizeHandler(this);
+        this.rowResizeHandler = new RowResizeHandler(this);
+        this.eventManager.RegisterHandler(this.colResizeHandler);
+        this.eventManager.RegisterHandler(this.rowResizeHandler);
 
-        this.isSelecting = false;
-        this.selectionStart = null;
-        this.resizeHandles = [];
-        this.isResizing = false;
-        this.resizeType = null;
-        this.resizeIndex = -1;
-        this.resizeStartPos = 0;
-        this.resizeStartSize = 0;
-        this.selectedCell = null;
-        this.isEditing = false;
-        this.cellInput = null;
+        this.isSelecting = false; // True if user is currently selecting cells
+        this.selectionStart = null; // Starting cell of current selection
+        this.resizeHandles = []; // Array of DOM elements for resize handles
+        this.isResizing = false; // True if a resize operation is in progress
+        this.resizeType = null; // 'row' or 'column' for current resize
+        this.resizeIndex = -1; // Index of row/column being resized
+        this.resizeStartPos = 0; // Mouse position at start of resize
+        this.resizeStartSize = 0; // Size at start of resize
+        this.selectedCell = null; // Currently selected cell {row, col}
+        this.isEditing = false; // True if a cell is being edited
+        this.cellInput = null; // Input element for cell editing
         this.initializeResizeHandling();
         this.updateHeaderCanvasSizes();
         this.drawHeaders();
@@ -89,9 +111,17 @@ class Grid {
         window.addEventListener('resize', this.handleResize);
         this.container.addEventListener('dblclick', this.handleCellDoubleClick.bind(this));
         this.container.addEventListener('click', this.handleClick.bind(this));
+        window.addEventListener('pointerdown', this.eventManager.pointerdown.bind(this.eventManager));
+
+        window.addEventListener('pointermove', this.eventManager.pointerMove.bind(this.eventManager));
+
+        window.addEventListener('pointerup', this.eventManager.pointerUp.bind(this.eventManager));
     }
     commandManager = new CommandManager();
     // Keyboard shortcut for undo/redo
+    /**
+     * Sets up keyboard shortcuts for undo and redo actions (Ctrl+Z, Ctrl+Y).
+     */
     initializeUndoRedoShortcuts() {
         window.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') {
@@ -104,9 +134,14 @@ class Grid {
         });
     }
     // --- Generalized auto-scroll for header selection (column/row) ---
+    /**
+     * Starts auto-scrolling when selecting columns or rows via header drag.
+     * @param {MouseEvent} e - The mouse event triggering auto-scroll.
+     */
     startAutoScrollHeaderSelection(e) {
         if (this._autoScrollHeaderActive) return;
         this._autoScrollHeaderActive = true;
+        console.log("startAutoScrollHeaderSelection");
         const doScroll = () => {
             if (!this.isSelectingHeader || (this.selectionHeaderType !== "column" && this.selectionHeaderType !== "row")) {
                 this._autoScrollHeaderActive = false;
@@ -137,9 +172,10 @@ class Grid {
             if (scrolled) {
                 this.renderVisibleTiles();
                 if (this.selectionHeaderType === "column") {
-                    this.handleColumnHeaderMouseMove(this._lastHeaderMouseEvent, true);
+                    this.columnSelectionHandler.pointerMove(this._lastHeaderMouseEvent, true);
                 } else if (this.selectionHeaderType === "row") {
-                    this.handleRowHeaderMouseMove(this._lastHeaderMouseEvent, true);
+                    this.rowSelectionHandler.pointerMove(this._lastHeaderMouseEvent, true);
+
                 }
             }
             if (this.isSelectingHeader && (this.selectionHeaderType === "column" || this.selectionHeaderType === "row")) {
@@ -150,6 +186,10 @@ class Grid {
         };
         window.requestAnimationFrame(doScroll);
     }
+    /**
+     * Handles single click events on grid tiles for cell selection.
+     * @param {MouseEvent} e - The click event.
+     */
     handleClick(e) {
         if (e.target.classList.contains('grid-canvas-tile')) {
             const rect = e.target.getBoundingClientRect();
@@ -182,33 +222,11 @@ class Grid {
 
     }
 
-    handleMouseUpForSelection(e) {
-        this.isSelecting = false;
-        // this.selectionStart = null;
-        this.selectionManager.renderSelection();
-        this.finishCellEdit();
-        this.updateStatusBar();
 
-    }
-
-    handleMouseDown(e) {
-        if (e.target.classList.contains('grid-canvas-tile')) {
-            const rect = e.target.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-
-            const tileRow = parseInt(e.target.dataset.tileRow);
-            const tileCol = parseInt(e.target.dataset.tileCol);
-
-            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
-            if (cellCoords) {
-                this.isSelecting = true;
-                this.selectionStart = cellCoords;
-                // e.preventDefault();
-            }
-        }
-    }
-
+    /**
+     * Handles click events on the column header for column selection.
+     * @param {MouseEvent} e - The click event.
+     */
     handleColumnHeaderClick(e) {
         const rect = this.colHeaderCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left + this.container.scrollLeft;
@@ -224,21 +242,12 @@ class Grid {
         }
     }
 
-    handleRowHeaderClick(e) {
-        const rect = this.rowHeaderCanvas.getBoundingClientRect();
-        const y = e.clientY - rect.top + this.container.scrollTop;
 
-        let currentY = 0;
-        for (let r = 0; r < TOTAL_ROWS; r++) {
-            const rowHeight = this.getRowHeight(r);
-            if (y >= currentY && y < currentY + rowHeight) {
-                this.selectRow(r);
-                break;
-            }
-            currentY += rowHeight;
-        }
-    }
 
+    /**
+     * Handles double-click events on a cell to start editing.
+     * @param {MouseEvent} e - The double-click event.
+     */
     handleCellDoubleClick(e) {
         if (e.target.classList.contains('grid-canvas-tile')) {
             const rect = e.target.getBoundingClientRect();
@@ -255,6 +264,14 @@ class Grid {
         }
     }
 
+    /**
+     * Gets the cell coordinates from a mouse position within a tile.
+     * @param {number} x - X position within the tile.
+     * @param {number} y - Y position within the tile.
+     * @param {number} tileRow - The tile's row index.
+     * @param {number} tileCol - The tile's column index.
+     * @returns {{row: number, col: number}|null} The cell coordinates or null if not found.
+     */
     getCellFromPosition(x, y, tileRow, tileCol) {
         const startGlobalRow = tileRow * VISIBLE_ROWS_PER_CANVAS_TILE;
         const startGlobalCol = tileCol * VISIBLE_COLS_PER_CANVAS_TILE;
@@ -277,6 +294,11 @@ class Grid {
         return null;
     }
 
+    /**
+     * Selects a single cell and updates the selection manager.
+     * @param {number} row - The row index.
+     * @param {number} col - The column index.
+     */
     selectCell(row, col) {
         console.log("selectCell", row, col);
         if (this.isEditing) {
@@ -289,6 +311,10 @@ class Grid {
         this.updateStatusBar();
     }
 
+    /**
+     * Selects an entire column and updates the selection manager.
+     * @param {number} col - The column index.
+     */
     selectColumn(col) {
         if (this.isEditing) {
             this.finishCellEdit();
@@ -301,6 +327,10 @@ class Grid {
         this.updateStatusBar();
     }
 
+    /**
+     * Selects an entire row and updates the selection manager.
+     * @param {number} row - The row index.
+     */
     selectRow(row) {
         if (this.isEditing) {
             this.finishCellEdit();
@@ -313,6 +343,11 @@ class Grid {
         this.updateStatusBar();
     }
 
+    /**
+     * Starts editing the specified cell.
+     * @param {number} row - The row index.
+     * @param {number} col - The column index.
+     */
     startCellEdit(row, col) {
         if (this.isEditing) {
             this.finishCellEdit();
@@ -355,6 +390,11 @@ class Grid {
         this.redrawSelection();
     }
 
+    /**
+     * Positions the cell input element for editing at the correct cell location.
+     * @param {number} row - The row index.
+     * @param {number} col - The column index.
+     */
     positionCellInput(row, col) {
         let left = 0;
         for (let c = 0; c < col; c++) {
@@ -381,6 +421,9 @@ class Grid {
         this.cellInput.style.zIndex = '1000';
     }
 
+    /**
+     * Finishes cell editing, saves value, and updates the grid.
+     */
     finishCellEdit() {
         if (!this.isEditing || !this.cellInput) return;
         const newValue = this.cellInput.value;
@@ -395,6 +438,9 @@ class Grid {
         this.selectionManager.renderSelection();
     }
 
+    /**
+     * Cancels cell editing and restores previous value.
+     */
     cancelCellEdit() {
         if (!this.isEditing || !this.cellInput) return;
 
@@ -404,6 +450,11 @@ class Grid {
         this.selectionManager.renderSelection();
     }
 
+    /**
+     * Redraws a single cell in all visible tiles.
+     * @param {number} row - The row index.
+     * @param {number} col - The column index.
+     */
     redrawCellInTiles(row, col) {
         const tileRow = Math.floor(row / VISIBLE_ROWS_PER_CANVAS_TILE);
         const tileCol = Math.floor(col / VISIBLE_COLS_PER_CANVAS_TILE);
@@ -415,6 +466,9 @@ class Grid {
         }
     }
 
+    /**
+     * Redraws the current selection on all visible tiles.
+     */
     redrawSelection() {
         // Redraw all visible tiles to update selection visuals
         for (const tile of this.canvasTiles.values()) {
@@ -422,14 +476,29 @@ class Grid {
         }
     }
 
+    /**
+     * Gets the width of a column by index.
+     * @param {number} index - The column index.
+     * @returns {number} The width of the column.
+     */
     getColumnWidth(index) {
         return this.columns[index]?.width || DEFAULT_COLUMN_WIDTH;
     }
 
+    /**
+     * Gets the height of a row by index.
+     * @param {number} index - The row index.
+     * @returns {number} The height of the row.
+     */
     getRowHeight(index) {
         return this.rows[index]?.height || DEFAULT_ROW_HEIGHT;
     }
 
+    /**
+     * Sets the width of a column and redraws the grid.
+     * @param {number} index - The column index.
+     * @param {number} width - The new width.
+     */
     setColumnWidth(index, width) {
         if (this.columns[index]) {
             this.columns[index].setWidth(width);
@@ -437,6 +506,11 @@ class Grid {
         }
     }
 
+    /**
+     * Sets the height of a row and redraws the grid.
+     * @param {number} index - The row index.
+     * @param {number} height - The new height.
+     */
     setRowHeight(index, height) {
         if (this.rows[index]) {
             this.rows[index].setHeight(height);
@@ -444,6 +518,12 @@ class Grid {
         }
     }
 
+    /**
+     * Gets the Cell object for the specified row and column, creating it if needed.
+     * @param {number} rowIndex - The row index.
+     * @param {number} colIndex - The column index.
+     * @returns {Cell} The cell object.
+     */
     getCell(rowIndex, colIndex) {
         const key = `${rowIndex}_${colIndex}`;
         if (!this.cells.has(key)) {
@@ -451,16 +531,28 @@ class Grid {
         }
         return this.cells.get(key);
     }
+    /**
+     * Checks if a cell has content.
+     * @param {number} row - The row index.
+     * @param {number} col - The column index.
+     * @returns {boolean} True if the cell has content.
+     */
     cellHasContent(row, col) {
         const cell = this.getCell(row, col);
         return cell.hasContent();
     }
 
+    /**
+     * Initializes event listeners for row/column resizing.
+     */
     initializeResizeHandling() {
-        document.addEventListener('mousemove', this.handleMouseMove.bind(this));
-        document.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        // document.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        // document.addEventListener('mouseup', this.handleMouseUp.bind(this));
     }
 
+    /**
+     * Creates and positions resize handles for visible rows and columns.
+     */
     createResizeHandles() {
         // console.log("createResizeHandles")
         this.resizeHandles.forEach(handle => handle.remove());
@@ -510,7 +602,10 @@ class Grid {
                 }
 
 
-                handle.addEventListener('mousedown', this.handleResizeStart.bind(this));
+                // Delegate to ColResizeHandler for column resize handles
+                handle.addEventListener('mousedown', (e) => {
+                    if (this.colResizeHandler) this.colResizeHandler.pointerdown(e);
+                });
                 colHeaderContainer.appendChild(handle);
                 this.resizeHandles.push(handle);
             }
@@ -550,105 +645,24 @@ class Grid {
                     handle.classList.add("collapsHandleHorizontal");
                 }
                 else {
-
                     handle.classList.remove("collapsHandleHorizontal");
                 }
-                handle.addEventListener('mousedown', this.handleResizeStart.bind(this));
+                // Delegate to RowResizeHandler for row resize handles
+                handle.addEventListener('mousedown', (e) => {
+                    if (this.rowResizeHandler) this.rowResizeHandler.pointerdown(e);
+                });
                 rowHeaderContainer.appendChild(handle);
                 this.resizeHandles.push(handle);
             }
         }
     }
 
-    handleResizeStart(e) {
-        e.preventDefault();
-        this.isResizing = true;
-        this.resizeType = e.target.dataset.type;
-        this.resizeIndex = parseInt(e.target.dataset.index);
-
-        // Store the old size for undo/redo
-        if (this.resizeType === 'column') {
-            this.resizeStartPos = e.clientX;
-            this.resizeStartSize = this.getColumnWidth(this.resizeIndex);
-        } else {
-            this.resizeStartPos = e.clientY;
-            this.resizeStartSize = this.getRowHeight(this.resizeIndex);
-        }
-
-        // We'll store the old size here for command pattern
-        this._resizeOldSize = this.resizeStartSize;
-
-        const resizerLine = document.getElementById('resizer-line');
-        resizerLine.style.display = 'block';
-        if (this.resizeType === 'column') {
-            resizerLine.className = 'vertical-line';
-            resizerLine.style.width = '2px';
-            resizerLine.style.height = `${window.innerHeight}px`;
-            resizerLine.style.left = `${e.clientX}px`;
-            resizerLine.style.top = '0px';
-        } else {
-            resizerLine.className = 'horizontal-line';
-            resizerLine.style.width = '100%';
-            resizerLine.style.height = '2px';
-            resizerLine.style.left = '0px';
-            resizerLine.style.top = `${e.clientY}px`;
-        }
-
-        document.body.style.cursor = this.resizeType === 'column' ? 'col-resize' : 'row-resize';
-        this.highlightResizeLine();
-    }
-
-    handleMouseMove(e) {
-        if (!this.isResizing) return;
-
-        const resizerLine = document.getElementById('resizer-line');
-
-        if (this.resizeType === 'column' && this.resizeStartPos - this.resizeStartSize <= e.clientX) {
-            resizerLine.style.left = `${e.clientX}px`;
-        } else if (this.resizeType === 'row' && this.resizeStartPos - this.resizeStartSize < e.clientY) {
-            resizerLine.style.top = `${e.clientY}px`;
-        }
-        this.highlightResizeLine();
-    }
-
-    handleMouseUp(e) {
-        if (!this.isResizing) return;
-
-        const delta = this.resizeType === 'column'
-            ? e.clientX - this.resizeStartPos
-            : e.clientY - this.resizeStartPos;
-
-        const newSize = this.resizeStartSize + delta;
-        let oldSize = this._resizeOldSize;
-
-        // Only push to undo/redo if the size actually changed
-        if (this.resizeType === 'column') {
-            if (newSize !== oldSize) {
-                this.commandManager.execute(
-                    new ResizeColumnCommand(this, this.resizeIndex, oldSize, newSize)
-                );
-            }
-        } else {
-            if (newSize !== oldSize) {
-                this.commandManager.execute(
-                    new ResizeRowCommand(this, this.resizeIndex, oldSize, newSize)
-                );
-            }
-        }
-
-        // Hide resize line
-        document.getElementById('resizer-line').style.display = 'none';
-        document.body.style.cursor = 'default';
-
-        this.isResizing = false;
-        this.resizeType = null;
-        this.resizeIndex = -1;
-        this._resizeOldSize = null;
-        this.highlightResizeLine(true); // clear highlight
-    }
-
-
+  
     // Highlight only the border of the resizing row or column
+    /**
+     * Highlights the border of the resizing row or column, or clears highlight if done.
+     * @param {boolean} [clear=false] - Whether to clear the highlight.
+     */
     highlightResizeLine(clear = false) {
         if (!this.isResizing || clear) {
             // Clear highlight on all tiles
@@ -668,6 +682,9 @@ class Grid {
         }
     }
 
+    /**
+     * Redraws the entire grid and headers.
+     */
     redrawGrid() {
         for (const [key, tile] of this.canvasTiles.entries()) {
             tile.draw();
@@ -678,6 +695,9 @@ class Grid {
         // this.updateContentSizer();
     }
 
+    /**
+     * Updates the content sizer element to match the total grid size.
+     */
     updateContentSizer() {
         let totalWidth = 0;
         let totalHeight = 0;
@@ -694,6 +714,9 @@ class Grid {
         this.contentSizer.style.height = `${totalHeight}px`;
     }
 
+    /**
+     * Updates the sizes of the header canvases to match the grid wrapper.
+     */
     updateHeaderCanvasSizes() {
         const wrapperWidth = this.gridWrapper.clientWidth;
         const wrapperHeight = this.gridWrapper.clientHeight;
@@ -715,6 +738,9 @@ class Grid {
         this.rowHeaderCtx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
 
+    /**
+     * Draws the column and row headers, including selection highlights.
+     */
     drawHeaders() {
         // console.log("drawHeaders")
         const scrollTop = this.container.scrollTop;
@@ -739,6 +765,17 @@ class Grid {
                 } else if (selection.type === 'range') {
                     for (let r = selection.startRow; r <= selection.endRow; r++) selectedRows.add(r);
                     for (let c = selection.startCol; c <= selection.endCol; c++) selectedCols.add(c);
+
+                    // Highlight column headers if the range covers all rows for those columns
+                    if (selection.startRow === 0 && selection.endRow === TOTAL_ROWS - 1) {
+                        colHeaderBg = '#107C41';
+                        colHeaderText = '#fff';
+                    }
+                    // Highlight row headers if the range covers all columns for those rows
+                    if (selection.startCol === 0 && selection.endCol === TOTAL_COLUMNS - 1) {
+                        rowHeaderBg = '#107C41';
+                        rowHeaderText = '#fff';
+                    }
                 }
             } else if (selection.type === 'column') {
                 highlightColHeaders = true;
@@ -864,12 +901,19 @@ class Grid {
         this.createResizeHandles();
     }
 
+    /**
+     * Handles window or container resize events to update grid layout.
+     */
     HandleResize() {
         this.updateHeaderCanvasSizes();
         this.HandleScroll();
         this.selectionManager.renderSelection();
     }
 
+    /**
+     * Handles scroll events to update visible tiles and selection.
+     * @param {Event} e - The scroll event.
+     */
     HandleScroll(e) {
         // console.log("HandleScroll", e);
         // console.log("HandleScroll",e.target.scrollTop, e.target.scrollLeft);
@@ -878,6 +922,9 @@ class Grid {
 
     }
 
+    /**
+     * Renders all visible canvas tiles based on current scroll position.
+     */
     renderVisibleTiles() {
         // console.log("renderVisibleTiles")
         this.drawHeaders();
@@ -930,6 +977,9 @@ class Grid {
 
         // this.updateContentSizer();f
     }
+    /**
+     * Loads sample data into the grid for demonstration purposes.
+     */
     loadSampleData() {
         let numRows = 50000;
         let cols = ["id", "name", "age", "salary"];
@@ -957,6 +1007,9 @@ class Grid {
     }
 
 
+    /**
+     * Updates the status bar with statistics about the current selection.
+     */
     updateStatusBar() {
         const statusBar = document.getElementById('status-bar');
         if (!statusBar) return;
@@ -999,6 +1052,10 @@ class Grid {
         statusBar.textContent = `Count: ${count}    Sum: ${sum}    Min: ${min}    Max: ${max}    Avg: ${avg.toFixed(2)}`;
     }
     // --- Improved auto-scroll for range selection using requestAnimationFrame ---
+    /**
+     * Starts auto-scrolling when selecting a range by dragging outside the visible area.
+     * @param {MouseEvent} e - The mouse event triggering auto-scroll.
+     */
     startAutoScrollSelection(e) {
         if (this._autoScrollActive) return;
         this._autoScrollActive = true;
@@ -1010,7 +1067,7 @@ class Grid {
             }
             console.log("startAutoScrollSelection");;
             const containerRect = this.container.getBoundingClientRect();
-            const scrollMargin = 10; // px
+            const scrollMargin = 20; // px
             let scrolled = false;
             const lasstX = this._lastMouseEvent.clientX;
             const lastY = this._lastMouseEvent.clientY;
@@ -1034,10 +1091,10 @@ class Grid {
                 // Always re-render visible tiles to fix missing canvas/selection when scrolling up/left
                 this.renderVisibleTiles();
                 // Call the selection update logic
-                this.selectionManager.handleMouseMoveForSelection(this._lastMouseEvent, true);
+                this.selectionManager.pointerMove(this._lastMouseEvent, true);
             }
             if (this.isSelecting && this._lastMouseEvent.clientX == lasstX && this._lastMouseEvent.clientY == lastY) {
-                setTimeout(doScroll, 200); // If no movement, wait a bit before next scroll
+                setTimeout(doScroll, 100); // If no movement, wait a bit before next scroll
             }
             else {
                 this._autoScrollActive = false;
