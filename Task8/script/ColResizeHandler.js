@@ -49,15 +49,12 @@ export class ColResizeHandler {
         resizerLine.style.top = '0px';
         document.body.style.cursor = 'col-resize';
         this.highlightResizeLine();
-        document.addEventListener('mousemove', this.pointerMoveBind = this.pointerMove.bind(this));
-        document.addEventListener('mouseup', this.pointerUpBind = this.pointerUp.bind(this));
     }
     /**
      * Handles mousemove during column resizing.
      * @param {MouseEvent} e
      */
     pointerMove(e) {
-        if (!this.isResizing) return;
         const resizerLine = document.getElementById('resizer-line');
         resizerLine.style.left = `${e.clientX}px`;
         this.highlightResizeLine();
@@ -67,7 +64,6 @@ export class ColResizeHandler {
      * @param {MouseEvent} e
      */
     pointerUp(e) {
-        if (!this.isResizing) return;
         const delta = e.clientX - this.resizeStartPos;
         const newSize = this.resizeStartSize + delta;
         let oldSize = this._resizeOldSize;
@@ -82,8 +78,6 @@ export class ColResizeHandler {
         this.resizeIndex = -1;
         this._resizeOldSize = null;
         this.highlightResizeLine(true);
-        document.removeEventListener('mousemove', this.pointerMoveBind);
-        document.removeEventListener('mouseup', this.pointerUpBind);
     }
     /**
      * Highlights the border of the resizing column, or clears highlight if done.

@@ -46,8 +46,27 @@ export class RowSelectionHandler {
                 this.grid.isSelectingHeader = true;
                 this.grid.selectionHeaderType = "row";
                 this.grid.selectionHeaderStart = r;
-                // Start with single row selection
-                this.grid.selectRow(r);
+                if (e.ctrlKey) {
+                    // Multi-select rows
+                    if (!this.grid.multiSelectedRows) this.grid.multiSelectedRows = new Set();
+                    if (this.grid.multiSelectedRows.has(r)) {
+                        this.grid.multiSelectedRows.delete(r);
+                    } else {
+                        this.grid.multiSelectedRows.add(r);
+                    }
+                    const rowsArr = Array.from(this.grid.multiSelectedRows);
+                    this.grid.selectionManager.setSelection({
+                        type: 'multi-row',
+                        rows: rowsArr,
+                        contains: (row, col) => rowsArr.includes(row)
+                    });
+                    this.grid.drawHeaders(); // Force redraw
+                } else {
+                    // Clear previous multi-selected rows before new selection
+                    this.grid.multiSelectedRows = new Set();
+                    this.grid.selectionManager.setSelection(null); // Clear selection manager
+                    this.grid.selectRow(r);
+                }
                 break;
             }
             currentY += rowHeight;
@@ -59,7 +78,6 @@ export class RowSelectionHandler {
     pointerMove(e, fromAutoScroll) {
         this.grid._lastHeaderMouseEvent = e;
         if (!fromAutoScroll) this.grid.startAutoScrollHeaderSelection(e);
-        if (!this.grid.isSelectingHeader || this.grid.selectionHeaderType !== "row") return;
         const rect = this.grid.rowHeaderCanvas.getBoundingClientRect();
         const y = e.clientY - rect.top + this.grid.container.scrollTop;
         let currentY = 0;
@@ -86,4 +104,4 @@ export class RowSelectionHandler {
         }
     }
 
-} 
+}

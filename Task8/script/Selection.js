@@ -1,4 +1,4 @@
-import { TOTAL_COLUMNS, TOTAL_ROWS } from './config.js';
+import { TOTAL_COLUMNS, TOTAL_ROWS, VISIBLE_COLS_PER_CANVAS_TILE, VISIBLE_ROWS_PER_CANVAS_TILE } from './config.js';
 export class SelectionManager {
     /**
      * Creates a new SelectionManager for the grid.
@@ -18,6 +18,28 @@ export class SelectionManager {
         // Listen for keyboard navigation and editing
         document.addEventListener('keydown', this.handleKeydown.bind(this));
     }
+    getCellFromPosition(x, y, tileRow, tileCol) {
+        const startGlobalRow = tileRow * VISIBLE_ROWS_PER_CANVAS_TILE;
+        const startGlobalCol = tileCol * VISIBLE_COLS_PER_CANVAS_TILE;
+
+        let currentY = 0;
+        for (let r = startGlobalRow; r < Math.min(startGlobalRow + VISIBLE_ROWS_PER_CANVAS_TILE, TOTAL_ROWS); r++) {
+            const rowHeight = this.grid.getRowHeight(r);
+            if (y >= currentY && y < currentY + rowHeight) {
+                let currentX = 0;
+                for (let c = startGlobalCol; c < Math.min(startGlobalCol + VISIBLE_COLS_PER_CANVAS_TILE, TOTAL_COLUMNS); c++) {
+                    const colWidth = this.grid.getColumnWidth(c);
+                    if (x >= currentX && x < currentX + colWidth) {
+                        return { row: r, col: c };
+                    }
+                    currentX += colWidth;
+                }
+            }
+            currentY += rowHeight;
+        }
+        return null;
+    }
+
     hitTest(e) {
         console.log((e.target.classList && e.target.classList.contains('grid-canvas-tile')) || e.target === this.grid.container)
         if ((e.target.classList && e.target.classList.contains('grid-canvas-tile')) || e.target === this.grid.container) {
@@ -27,7 +49,57 @@ export class SelectionManager {
             return false;
         }
     }
+    // --- Improved auto-scroll for range selection using requestAnimationFrame ---
+    /**
+     * Starts auto-scrolling when selecting a range by dragging outside the visible area.
+     * @param {MouseEvent} e - The mouse event triggering auto-scroll.
+     */
+    startAutoScrollSelection(e) {
+        if (this.grid._autoScrollActive) return;
+        this.grid._autoScrollActive = true;
+        const doScroll = () => {
 
+            if (!this.grid.isSelecting) {
+                this.grid._autoScrollActive = false;
+                return;
+            }
+            console.log("startAutoScrollSelection");;
+            const containerRect = this.grid.container.getBoundingClientRect();
+            const scrollMargin = 20; // px
+            let scrolled = false;
+            const lasstX = this._lastMouseEvent.clientX;
+            const lastY = this._lastMouseEvent.clientY;
+            // Horizontal
+            if (this._lastMouseEvent && this._lastMouseEvent.clientX < containerRect.left + scrollMargin) {
+                this.grid.container.scrollLeft -= 2;
+                scrolled = true;
+            } else if (this._lastMouseEvent && this._lastMouseEvent.clientX > containerRect.right - scrollMargin) {
+                this.grid.container.scrollLeft += 2;
+                scrolled = true;
+            }
+            // Vertical
+            if (this._lastMouseEvent && this._lastMouseEvent.clientY < containerRect.top + scrollMargin) {
+                this.grid.container.scrollTop -= 2;
+                scrolled = true;
+            } else if (this._lastMouseEvent && this._lastMouseEvent.clientY > containerRect.bottom - scrollMargin) {
+                this.grid.container.scrollTop += 2;
+                scrolled = true;
+            }
+            if (scrolled) {
+                // Always re-render visible tiles to fix missing canvas/selection when scrolling up/left
+                this.grid.renderVisibleTiles();
+                // Call the selection update logic
+                this.pointerMove(this._lastMouseEvent, true);
+            }
+            if (this.grid.isSelecting && this._lastMouseEvent.clientX == lasstX && this._lastMouseEvent.clientY == lastY) {
+                setTimeout(doScroll, 100); // If no movement, wait a bit before next scroll
+            }
+            else {
+                this.grid._autoScrollActive = false;
+            }
+        };
+        window.requestAnimationFrame(doScroll);
+    }
     /**
     * Handles mouse up event to finish selection and update UI.
     */
@@ -42,30 +114,28 @@ export class SelectionManager {
     * Handles mouse down event to start a new selection if on a grid tile.
     */
     pointerdown(e) {
-        console.log("pointerdown event");
-        // if (e.target.classList.contains('grid-canvas-tile')) {
-            const rect = e.target.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+        const rect = e.target.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
 
-            const tileRow = parseInt(e.target.dataset.tileRow);
-            const tileCol = parseInt(e.target.dataset.tileCol);
+        const tileRow = parseInt(e.target.dataset.tileRow);
+        const tileCol = parseInt(e.target.dataset.tileCol);
 
-            const cellCoords = this.grid.getCellFromPosition(x, y, tileRow, tileCol);
-            if (cellCoords) {
-                this.grid.isSelecting = true;
-                this.grid.selectionStart = cellCoords;
-                // e.preventDefault();
-            }
-        // }
+        const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
+        if (cellCoords) {
+            this.grid.isSelecting = true;
+            this.grid.selectionStart = cellCoords;
+
+        }
+
     }
     /**
      * Handles mouse move event for updating selection range, including extrapolation when outside tiles.
      */
     pointerMove(e, fromAutoScroll) {
 
-        this.grid._lastMouseEvent = e;
-        if (!fromAutoScroll) this.grid.startAutoScrollSelection(e);
+        this._lastMouseEvent = e;
+        if (!fromAutoScroll) this.startAutoScrollSelection(e);
         if (!this.grid.isSelecting || !this.grid.selectionStart) return;
 
         const anchorRow = this.grid.selectionStart.row;
@@ -135,7 +205,7 @@ export class SelectionManager {
             const tileRow = parseInt(target.dataset.tileRow);
             const tileCol = parseInt(target.dataset.tileCol);
 
-            const cellCoords = this.grid.getCellFromPosition(x, y, tileRow, tileCol);
+            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
             if (cellCoords) {
                 // Create range selection with active cell for correct scrolling
                 const rangeSelection = new RangeSelection(
@@ -156,7 +226,7 @@ export class SelectionManager {
         this.grid.drawHeaders();
     }
 
-  
+
 
     /**
      * Handles keyboard navigation and editing for the grid selection.
@@ -164,13 +234,13 @@ export class SelectionManager {
     handleKeydown(e) {
         console.log("keydown event", e.key);
 
-        if (this.grid.isEditing) {
+        const key = e.key;
+        if (this.grid.isEditing && key !== "ArrowLeft" && key !== "ArrowRight" && key !== "ArrowUp" && key !== "ArrowDown") {
             return;
         }
 
         console.log("event", this.grid.container.scrollTop, this.grid.container.scrollLeft);
 
-        const key = e.key;
         switch (key) {
             case "ArrowLeft":
                 e.preventDefault();
@@ -293,6 +363,63 @@ export class SelectionManager {
             }
         }
     }
+
+
+    /**
+    * Handles single click events on grid tiles for cell selection.
+    * @param {MouseEvent} e - The click event.
+    */
+    handleClick(e) {
+        if (e.target.classList.contains('grid-canvas-tile')) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            const tileRow = parseInt(e.target.dataset.tileRow);
+            const tileCol = parseInt(e.target.dataset.tileCol);
+
+            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                // Check if there's an active RangeSelection and if the click is within it
+                if (this.grid.selectionManager.activeSelection?.type === 'range' &&
+                    this.grid.selectionManager.activeSelection.contains(cellCoords.row, cellCoords.col)) {
+                    // Clicked within the existing range selection, do nothing to preserve it
+                    // console.log("erer")
+                    console.log("single click")
+                    return;
+                }
+
+                // Clicked outside the range or no range selection, select the single cell
+                this.grid.selectCell(cellCoords.row, cellCoords.col);
+
+            } else {
+                // Clicked outside any valid cell, clear selection
+                this.clearSelection();
+            }
+        }
+        this.grid.drawHeaders();
+
+    }
+
+    /**
+     * Handles double-click events on a cell to start editing.
+     * @param {MouseEvent} e - The double-click event.
+     */
+    handleCellDoubleClick(e) {
+        if (e.target.classList.contains('grid-canvas-tile')) {
+            const rect = e.target.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            console.log(e.clientX, e.clientY, rect.left, rect.top, x, y);
+            const tileRow = parseInt(e.target.dataset.tileRow);
+            const tileCol = parseInt(e.target.dataset.tileCol);
+
+            const cellCoords = this.getCellFromPosition(x, y, tileRow, tileCol);
+            if (cellCoords) {
+                this.grid.startCellEdit(cellCoords.row, cellCoords.col);
+            }
+        }
+    }
     /**
      * Sets the current selection and redraws it.
      * @param {CellSelection|RangeSelection|RowSelection|ColumnSelection} selection
@@ -307,13 +434,38 @@ export class SelectionManager {
      */
     scrollSelectionIntoView() {
         if (!this.activeSelection) return;
+        if (this.activeSelection.type === 'multi-row') {
+            // Scroll to first selected row
+            if (this.activeSelection.rows && this.activeSelection.rows.length > 0) {
+                let row = this.activeSelection.rows[0];
+                let top = 0;
+                for (let r = 0; r < row; r++) top += this.grid.getRowHeight(r);
+                const visibleTop = this.grid.container.scrollTop;
+                if (top < visibleTop) {
+                    this.grid.container.scrollTop = top;
+                }
+            }
+            return;
+        }
+        if (this.activeSelection.type === 'multi-column') {
+            // Scroll to first selected column
+            if (this.activeSelection.cols && this.activeSelection.cols.length > 0) {
+                let col = this.activeSelection.cols[0];
+                let left = 0;
+                for (let c = 0; c < col; c++) left += this.grid.getColumnWidth(c);
+                const visibleLeft = this.grid.container.scrollLeft;
+                if (left < visibleLeft) {
+                    this.grid.container.scrollLeft = left;
+                }
+            }
+            return;
+        }
+        // ...existing code for cell, range, row, column...
         let row = 0, col = 0;
         if (this.activeSelection.type === 'cell') {
             row = this.activeSelection.row;
             col = this.activeSelection.col;
         } else if (this.activeSelection.type === 'range') {
-            // Use active cell if present, else fallback to startRow/startCol
-            // console.log("activeSelection", this.activeSelection);
             row = (typeof this.activeSelection.activeRow === 'number') ? this.activeSelection.activeRow : this.activeSelection.startRow;
             col = (typeof this.activeSelection.activeCol === 'number') ? this.activeSelection.activeCol : this.activeSelection.startCol;
         } else if (this.activeSelection.type === 'row') {
@@ -333,15 +485,11 @@ export class SelectionManager {
         const visibleTop = container.scrollTop;
         const visibleRight = visibleLeft + container.clientWidth;
         const visibleBottom = visibleTop + container.clientHeight;
-        // Scroll horizontally if needed
         if (left < visibleLeft) {
-            // console.log("left", left, "visibleLeft", visibleLeft);
             container.scrollLeft = left;
         } else if (left + colWidth > visibleRight) {
-            // console.log("colWidth", colWidth, "container.clientWidth", container.clientWidth);
             container.scrollLeft = left + colWidth - container.clientWidth;
         }
-        // Scroll vertically if needed
         if (top < visibleTop) {
             container.scrollTop = top;
         } else if (top + rowHeight > visibleBottom) {

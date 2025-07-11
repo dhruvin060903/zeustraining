@@ -26,6 +26,7 @@ export class RowResizeHandler {
      * @returns {boolean}
      */
     hitTest(e) {
+        // console.log(e.target.classList && e.target.classList.contains('row-resize-handle'));
         return e.target.classList && e.target.classList.contains('row-resize-handle');
     }
     /**
@@ -56,7 +57,6 @@ export class RowResizeHandler {
      * @param {MouseEvent} e
      */
     pointerMove(e) {
-        if (!this.isResizing) return;
         const resizerLine = document.getElementById('resizer-line');
         resizerLine.style.top = `${e.clientY}px`;
         this.highlightResizeLine();
@@ -66,7 +66,6 @@ export class RowResizeHandler {
      * @param {MouseEvent} e
      */
     pointerUp(e) {
-        if (!this.isResizing) return;
         const delta = e.clientY - this.resizeStartPos;
         const newSize = this.resizeStartSize + delta;
         let oldSize = this._resizeOldSize;
@@ -80,9 +79,9 @@ export class RowResizeHandler {
         this.isResizing = false;
         this.resizeIndex = -1;
         this._resizeOldSize = null;
-        this.highlightResizeLine(true);
-        document.removeEventListener('mousemove', this.pointerMoveBind);
-        document.removeEventListener('mouseup', this.pointerUpBind);
+        // this.highlightResizeLine(true);
+        // document.removeEventListener('mousemove', this.pointerMoveBind);
+        // document.removeEventListener('mouseup', this.pointerUpBind);
     }
     /**
      * Highlights the border of the resizing row, or clears highlight if done.

@@ -109,7 +109,7 @@ export class CanvasTile {
         this.drawCellContent(ctx);
         this.drawSelectionBackgrounds(ctx);
 
-        // Draw selection borders on top
+        // // Draw selection borders on top
         this.drawSelectionBorders(ctx);
     }
 
@@ -470,7 +470,7 @@ export class CanvasTile {
                 ctx.beginPath();
                 ctx.rect(currentX, currentY, colWidth - 0.5, rowHeight - 0.5);
 
-                ctx.font = '12px Arial';
+                ctx.font = '16px Arial';
                 ctx.textAlign = 'left';
                 ctx.textBaseline = 'middle';
                 // ctx.fillStyle = '#374151';

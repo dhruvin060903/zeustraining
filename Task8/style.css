@@ -143,19 +143,19 @@ body {
 
 .cell-input {
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
-  font-size: 12px;
-  background: white;
-  border: 2px solid #137e43 !important;
-  outline: none !important;
-  padding: 2px 4px;
+  font-family: "Times New Roman", Times, serif, sans-serif;
+
+  font-size: 16px;
+  
+  border: none !important;
+  padding: 2px;
   margin: 0;
-  resize: none;
+  /* resize: none; */
 }
 
 .cell-input:focus {
-  border: 2px solid #137e43 !important;
-  outline: none !important;
+  /* border: 2px solid #137e43 !important; */
+  /* outline: none !important; */
   box-shadow: 0 0 0 1px #137e43;
 }
 
@@ -180,12 +180,12 @@ body {
   left: 50px;
   right: 0;
   bottom: 0;
-  height: 28px;
+  height: 4vh;
   line-height: 28px;
   padding-left: 12px;
   background: #f8f8f8;
   border-top: 1px solid #d1d5db;
-  font-size: 13px;
+  font-size: 14px;
   color: #222;
   z-index: 30;
   user-select: none;

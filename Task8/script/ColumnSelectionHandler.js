@@ -52,8 +52,27 @@ export class ColumnSelectionHandler {
                 this.grid.isSelectingHeader = true;
                 this.grid.selectionHeaderType = "column";
                 this.grid.selectionHeaderStart = c;
-                // Start with single column selection
-                this.grid.selectColumn(c);
+                if (e.ctrlKey) {
+                    // Multi-select columns
+                    if (!this.grid.multiSelectedCols) this.grid.multiSelectedCols = new Set();
+                    if (this.grid.multiSelectedCols.has(c)) {
+                        this.grid.multiSelectedCols.delete(c);
+                    } else {
+                        this.grid.multiSelectedCols.add(c);
+                    }
+                    const colsArr = Array.from(this.grid.multiSelectedCols);
+                    this.grid.selectionManager.setSelection({
+                        type: 'multi-column',
+                        cols: colsArr,
+                        contains: (row, col) => colsArr.includes(col)
+                    });
+                    this.grid.drawHeaders(); // Force redraw
+                } else {
+                    // Clear previous multi-selected columns before new selection
+                    this.grid.multiSelectedCols = new Set();
+                    this.grid.selectionManager.setSelection(null); // Clear selection manager
+                    this.grid.selectColumn(c);
+                }
                 break;
             }
             currentX += colWidth;
@@ -67,7 +86,6 @@ export class ColumnSelectionHandler {
     pointerMove(e, fromAutoScroll) {
         this.grid._lastHeaderMouseEvent = e;
         if (!fromAutoScroll) this.grid.startAutoScrollHeaderSelection(e);
-        if (!this.grid.isSelectingHeader || this.grid.selectionHeaderType !== "column") return;
         const rect = this.grid.colHeaderCanvas.getBoundingClientRect();
         const x = e.clientX - rect.left + this.grid.container.scrollLeft;
         let currentX = 0;
@@ -94,4 +112,4 @@ export class ColumnSelectionHandler {
         }
     }
 
-} 
+}
