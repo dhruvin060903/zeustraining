@@ -9,21 +9,11 @@ import { RowResizeHandler } from "./RowResizeHandler.js";
 import { CommandManager, EditCellCommand } from "./CommandManager.js";
 import { EventManager } from "./EventManager.js";
 import {
-    TOTAL_ROWS,
-    TOTAL_COLUMNS,
-    DEFAULT_ROW_HEIGHT,
-    DEFAULT_COLUMN_WIDTH,
-    HEADER_HEIGHT,
-    HEADER_WIDTH,
-    VISIBLE_ROWS_PER_CANVAS_TILE,
-    VISIBLE_COLS_PER_CANVAS_TILE,
-    TILE_BUFFER_ROWS,
-    TILE_BUFFER_COLS
+    TOTAL_ROWS, TOTAL_COLUMNS, DEFAULT_ROW_HEIGHT, DEFAULT_COLUMN_WIDTH, HEADER_HEIGHT, HEADER_WIDTH, VISIBLE_ROWS_PER_CANVAS_TILE, VISIBLE_COLS_PER_CANVAS_TILE, TILE_BUFFER_ROWS, TILE_BUFFER_COLS
 } from './config.js';
 import { ColumnSelectionHandler } from "./ColumnSelectionHandler.js";
 import { RowSelectionHandler } from "./RowSelectionHandler.js";
 import { CellInputManager } from "./CellInputManager.js";
-
 
 // for reduce multiple calling
 function debounce(func, delay) {
@@ -34,8 +24,6 @@ function debounce(func, delay) {
         timeout = setTimeout(() => func.apply(context, args), delay);
     };
 }
-
-
 
 /**
  * Main Grid class for managing spreadsheet/grid logic, rendering, and user interaction.
@@ -120,9 +108,20 @@ class Grid {
         window.addEventListener('pointermove', this.eventManager.pointerMove.bind(this.eventManager));
 
         window.addEventListener('pointerup', this.eventManager.pointerUp.bind(this.eventManager));
+        window.addEventListener('keyup', this.handleKeyup.bind(this));
+
+    }
+    // --- Grid initialization and rendering methods ---
+    handleKeyup(e) {
+        const key = e.key;
+        if (key === 'Ctrl' || key === 'Control') {
+            // console.log("Ctrl key pressed");
+            this.multiSelectedCols = new Set();
+            this.multiSelectedRows = new Set();
+        }
     }
     commandManager = new CommandManager();
-    // Keyboard shortcut for undo/redo
+
     /**
      * Sets up keyboard shortcuts for undo and redo actions (Ctrl+Z, Ctrl+Y).
      */
@@ -137,11 +136,8 @@ class Grid {
             }
         });
     }
+    
     // --- Generalized auto-scroll for header selection (column/row) ---
-    /**
-     * Starts auto-scrolling when selecting columns or rows via header drag.
-     * @param {MouseEvent} e - The mouse event triggering auto-scroll.
-     */
     startAutoScrollHeaderSelection(e) {
         if (this._autoScrollHeaderActive) return;
         this._autoScrollHeaderActive = true;
@@ -273,13 +269,6 @@ class Grid {
     }
 
     /**
-     * Positions the cell input element for editing at the correct cell location.
-     * @param {number} row - The row index.
-     * @param {number} col - The column index.
-     */
-    // ...existing code...
-
-    /**
      * Finishes cell editing, saves value, and updates the grid.
      */
     finishCellEdit(newValue) {
@@ -403,7 +392,6 @@ class Grid {
         return cell.hasContent();
     }
 
-
     /**
      * Creates and positions resize handles for visible rows and columns.
      */
@@ -501,8 +489,6 @@ class Grid {
             }
         }
     }
-
-
 
     /**
      * Redraws the entire grid and headers.

@@ -235,12 +235,12 @@ export class SelectionManager {
         console.log("keydown event", e.key);
 
         const key = e.key;
+        
         if (this.grid.isEditing && key !== "ArrowLeft" && key !== "ArrowRight" && key !== "ArrowUp" && key !== "ArrowDown") {
             return;
         }
 
         console.log("event", this.grid.container.scrollTop, this.grid.container.scrollLeft);
-
         switch (key) {
             case "ArrowLeft":
                 e.preventDefault();
@@ -270,8 +270,11 @@ export class SelectionManager {
                 this.handleArrowRight();
                 return;
         }
-
+        if(this.activeSelection){
         this.grid.selectedCell = { row: this.activeSelection.row, col: (this.activeSelection.col) };
+        }
+        else 
+            return;
         // If user pressed a single printable character without modifier keys
 
         if (key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {

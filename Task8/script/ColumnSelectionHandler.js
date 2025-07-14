@@ -15,6 +15,9 @@ export class ColumnSelectionHandler {
          */
         this.grid = grid;
     }
+
+
+   
     /**
            * Check if the event is within the row header area.
            */

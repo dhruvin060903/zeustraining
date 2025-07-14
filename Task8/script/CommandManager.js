@@ -65,6 +65,7 @@ export class ResizeColumnCommand extends Command {
         this.grid.setColumnWidth(this.colIndex, this.newWidth);
     }
     undo() {
+        
         this.grid.setColumnWidth(this.colIndex, this.oldWidth);
     }
 }
